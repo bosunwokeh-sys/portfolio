@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B3A63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Portfolio">
+<title>Portfolio Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #EEF1F5; --card: #FFFFFF; --sunk: #F4F6F9; --fg: #121722; --muted: #5F6B7A; --line: #DDE2EA;
+    --accent: #1B3A63; --accent-ink: #FFFFFF; --focus: #3B6FD8;
+    --pos: #0B8A50; --neg: #C3362B;
+    --c-crypto: #D8900A; --c-meme: #C93C86; --c-aandeel: #2C66D0; --c-index: #0F9682;
+    --shadow: 0 1px 2px rgba(18,23,34,.05), 0 6px 18px rgba(18,23,34,.05);
+    --scrim: rgba(10,14,22,.45);
+    --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --f-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C1018; --card: #151B26; --sunk: #1B2230; --fg: #EEF2F7; --muted: #95A0B0; --line: #252D3B;
+      --accent: #8DB1F0; --accent-ink: #0C1018; --focus: #8DB1F0;
+      --pos: #3FD18B; --neg: #FF7A6E;
+      --c-crypto: #F0A928; --c-meme: #E25CA2; --c-aandeel: #5A8CF0; --c-index: #2BC0A8;
+      --shadow: none; --scrim: rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0C1018; --card: #151B26; --sunk: #1B2230; --fg: #EEF2F7; --muted: #95A0B0; --line: #252D3B;
+    --accent: #8DB1F0; --accent-ink: #0C1018; --focus: #8DB1F0;
+    --pos: #3FD18B; --neg: #FF7A6E;
+    --c-crypto: #F0A928; --c-meme: #E25CA2; --c-aandeel: #5A8CF0; --c-index: #2BC0A8;
+    --shadow: none; --scrim: rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  [hidden] { display: none !important; }
+  body { margin: 0; padding-top: env(safe-area-inset-top, 0px); background: var(--bg); color: var(--fg); font: 15px/1.45 var(--f-body); }
+  .wrap { max-width: 600px; margin: 0 auto; padding-inline: 16px; padding-block: 14px 120px; display: grid; gap: 12px; }
+  .num { font-variant-numeric: tabular-nums; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 4px 2px; flex-wrap: wrap; }
+  header h1 { font: 700 21px/1.1 var(--f-display); letter-spacing: -.01em; margin: 0; }
+  .status { font-size: 12px; color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: 18px; min-width: 0; }
+  .eyebrow { font-size: 12px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; font-weight: 600; }
+  .big { font: 700 clamp(32px, 9vw, 42px)/1.05 var(--f-display); letter-spacing: -.02em; margin: 6px 0 6px; }
+  .chg { font-weight: 600; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .kpi { background: var(--sunk); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+  .kpi .l { font-size: 12px; color: var(--muted); }
+  .kpi .v { font-weight: 600; }
+  .row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .row-head strong { font: 600 16px/1.2 var(--f-display); }
+  .alloc { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: var(--sunk); margin: 12px 0; }
+  .alloc span { height: 100%; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; font-size: 13px; }
+  .legend div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend .p { margin-left: auto; color: var(--muted); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
+  .tabs button { border: 0; background: transparent; color: var(--muted); font: 600 14px var(--f-body); padding: 10px; border-radius: 10px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--sunk); color: var(--fg); }
+  .list { padding: 2px 16px; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  button.item { width: 100%; background: none; border-left: 0; border-right: 0; border-top: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .item:last-child { border-bottom: 0; }
+  .tk { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; font: 700 10.5px var(--f-body); letter-spacing: -.02em; color: #fff; flex: none; }
+  .mid { flex: 1; min-width: 0; }
+  .mid .t { font-weight: 600; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; }
+  .mid .s { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .right { text-align: right; }
+  .right .v { font-weight: 600; }
+  .right .c { font-size: 12px; }
+  .chip { white-space: nowrap; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 99px; background: var(--sunk); color: var(--muted); }
+  .chip.stale { color: var(--neg); }
+  .chip.live { color: var(--pos); }
+  .buy { color: var(--pos); } .sell { color: var(--neg); }
+  .del { border: 1px solid var(--line); background: var(--card); color: var(--muted); border-radius: 10px; padding: 6px 10px; font: 600 12px var(--f-body); cursor: pointer; flex: none; }
+  .del.armed { background: var(--neg); border-color: var(--neg); color: #fff; }
+  .empty { text-align: center; color: var(--muted); padding: 26px 8px; }
+  .empty strong { color: var(--fg); }
+  .notice { font-size: 13px; color: var(--muted); background: var(--sunk); border-radius: 12px; padding: 10px 12px; margin: 0; }
+  .fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); height: 54px; padding: 0 26px;
+    border-radius: 18px; border: 0; background: var(--accent); color: var(--accent-ink); font: 700 16px var(--f-body); box-shadow: 0 8px 22px rgba(0,0,0,.22); cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .scrim { position: fixed; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 600px; max-height: 92%; overflow-y: auto; background: var(--card);
+    border-radius: 22px 22px 0 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateY(105%); visibility: hidden;
+    transition: transform .25s ease, visibility 0s .25s; }
+  .sheet.open { transform: none; visibility: visible; transition: transform .25s ease; }
+  @media (prefers-reduced-motion: reduce) { .sheet, .scrim, .toast { transition: none; } }
+  .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 4px auto 12px; }
+  .sheet h3 { font: 700 19px var(--f-display); margin: 0 0 14px; }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; background: var(--sunk); padding: 4px; border-radius: 12px; margin-bottom: 12px; }
+  .seg button { border: 0; background: transparent; color: var(--fg); padding: 10px 2px; border-radius: 9px; font: 600 14px var(--f-body); cursor: pointer; }
+  .seg button.on { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .seg.type button.on[data-v="Koop"] { color: var(--pos); }
+  .seg.type button.on[data-v="Verkoop"] { color: var(--neg); }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 4px 2px; }
+  input, select { width: 100%; font: inherit; font-size: 16px; color: var(--fg); background: var(--sunk); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .two > div { min-width: 0; }
+  .hint { font-size: 12px; color: var(--muted); margin: -6px 2px 12px; }
+  .err-line { font-size: 12px; color: var(--neg); margin: -6px 2px 12px; }
+  .total { display: flex; justify-content: space-between; padding: 12px 2px; border-top: 1px solid var(--line); font-weight: 600; }
+  .primary { width: 100%; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); padding: 15px; font: 700 16px var(--f-body); cursor: pointer; margin-top: 6px; }
+  .primary:disabled { opacity: .5; }
+  .ghost { width: 100%; border: 0; background: transparent; color: var(--muted); padding: 12px; font: 500 15px var(--f-body); cursor: pointer; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .stats > div { background: var(--sunk); border-radius: 10px; padding: 8px 10px; }
+  .stats .l { font-size: 11px; color: var(--muted); }
+  .stats .v { font-weight: 600; font-size: 14px; }
+  .toast { position: fixed; left: 50%; top: calc(14px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -160%); background: var(--fg); color: var(--bg);
+    padding: 10px 16px; border-radius: 12px; font-size: 14px; transition: transform .25s; max-width: calc(100% - 32px); z-index: 10; }
+  .toast.show { transform: translate(-50%, 0); }
+  .toast.err { background: var(--neg); color: #fff; }
+  .login { max-width: 420px; width: 100%; margin: 8vh auto 0; display: grid; gap: 14px; }
+  .login h1 { font: 700 30px/1.1 var(--f-display); letter-spacing: -.02em; margin: 0; }
+  .login p { color: var(--muted); margin: 0; }
+  .hdr-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn { border: 1px solid var(--line); background: var(--card); color: var(--fg); height: 38px; min-width: 38px; padding: 0 10px; border-radius: 11px; font: 600 13px var(--f-body); cursor: pointer; }
+  .icon-btn.spin span { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="loginView" hidden>
+  <div class="login card">
+    <h1>Portfolio</h1>
+    <p>Log in met je e-mailadres. Je krijgt een link in je mail; tik erop en je bent binnen. Geen wachtwoord nodig.</p>
+    <div>
+      <label for="lEmail">E-mailadres</label>
+      <input id="lEmail" type="email" autocomplete="email" placeholder="jij@voorbeeld.nl">
+      <button class="primary" id="lSend" type="button">Stuur inloglink</button>
+    </div>
+    <p class="status" id="lMsg"></p>
+  </div>
+</div>
+
+<div class="wrap" id="appView" hidden>
+  <header>
+    <h1>Portfolio</h1>
+    <div class="hdr-actions">
+      <span class="status" id="status"></span>
+      <button class="icon-btn" id="refresh" type="button" aria-label="Koersen verversen"><span>↻</span></button>
+      <button class="icon-btn" id="logout" type="button">Uitloggen</button>
+    </div>
+  </header>
+  <section class="card" aria-label="Totaal">
+    <div class="eyebrow">Totale waarde</div>
+    <div class="big num" id="totaal">€ 0,00</div>
+    <div class="chg num" id="totaalWv">Nog geen posities</div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">Betaald voor wat je hebt</div><div class="v num" id="kostprijs">€ 0,00</div></div>
+      <div class="kpi"><div class="l">Gerealiseerd (verkocht)</div><div class="v num" id="gerealiseerd">€ 0,00</div></div>
+    </div>
+  </section>
+  <section class="card" aria-label="Verdeling">
+    <div class="row-head"><strong>Verdeling</strong><span class="status">per soort</span></div>
+    <div class="alloc" id="alloc"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabPos" aria-selected="true">Posities</button>
+    <button role="tab" id="tabTx" aria-selected="false">Geschiedenis</button>
+  </div>
+  <section class="card list" id="posList" aria-label="Posities"></section>
+  <section class="card list" id="txList" aria-label="Geschiedenis" hidden></section>
+  <p class="notice">Koersen komen van CoinGecko (crypto), DexScreener (nieuwe memecoins) en Yahoo Finance (aandelen en ETF's) en kunnen enkele minuten vertraagd zijn. Dit is een hulpmiddel voor je overzicht, geen financieel advies.</p>
+</div>
+
+<button class="fab" id="fab" hidden>+ Transactie</button>
+<div class="scrim" id="scrim"></div>
+
+<div class="sheet" id="addSheet" role="dialog" aria-label="Nieuwe transactie">
+  <div class="grab"></div>
+  <h3>Nieuwe transactie</h3>
+  <div class="seg type" id="segType">
+    <button type="button" data-v="Koop" class="on">Koop</button>
+    <button type="button" data-v="Verkoop">Verkoop</button>
+  </div>
+  <div class="seg" id="segSoort">
+    <button type="button" data-v="Crypto" class="on">Crypto</button>
+    <button type="button" data-v="Memecoin">Meme</button>
+    <button type="button" data-v="Aandeel">Aandeel</button>
+    <button type="button" data-v="Index/ETF">Index</button>
+  </div>
+  <label for="fTicker">Ticker</label>
+  <input id="fTicker" placeholder="bijv. BTC, PEPE, ASML" autocapitalize="characters" autocomplete="off" list="tickers">
+  <datalist id="tickers"></datalist>
+  <div class="two">
+    <div><label for="fAantal">Aantal</label><input id="fAantal" inputmode="decimal" placeholder="0"></div>
+    <div><label for="fPrijs">Prijs per stuk (€)</label><input id="fPrijs" inputmode="decimal" placeholder="0,00"></div>
+  </div>
+  <div class="two">
+    <div><label for="fKosten">Kosten (€)</label><input id="fKosten" inputmode="decimal" placeholder="0,00"></div>
+    <div><label for="fDatum">Datum</label><input id="fDatum" type="date"></div>
+  </div>
+  <label for="fNotitie">Notitie (optioneel)</label>
+  <input id="fNotitie" placeholder="bijv. platform of reden">
+  <div class="total num"><span id="totLabel">Totaal betaald</span><span id="fTotaal">€ 0,00</span></div>
+  <button class="primary" id="saveTx" type="button">Opslaan</button>
+  <button class="ghost" type="button" data-close>Annuleren</button>
+</div>
+
+<div class="sheet" id="priceSheet" role="dialog" aria-label="Koers instellen">
+  <div class="grab"></div>
+  <h3 id="pTitle">Koers</h3>
+  <div class="stats num" id="pStats"></div>
+  <label for="pBron">Koersbron</label>
+  <select id="pBron">
+    <option value="Crypto">Automatisch – crypto (CoinGecko)</option>
+    <option value="Memecoin">Automatisch – nieuwe memecoin (contractadres)</option>
+    <option value="Aandeel/ETF">Automatisch – aandeel of ETF (Yahoo Finance)</option>
+    <option value="Handmatig">Handmatig</option>
+  </select>
+  <div id="codeWrap">
+    <label for="pCode" id="pCodeLabel">Code</label>
+    <input id="pCode" autocapitalize="off" autocomplete="off">
+    <div class="hint" id="pCodeHint"></div>
+  </div>
+  <div class="err-line" id="pErr" hidden></div>
+  <div id="manWrap">
+    <label for="pPrijs">Handmatige koers (€)</label>
+    <input id="pPrijs" inputmode="decimal">
+    <div class="hint" id="pHint"></div>
+  </div>
+  <button class="primary" id="savePrice" type="button">Opslaan</button>
+  <button class="ghost" type="button" data-close>Annuleren</button>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  // ---------- Instellingen ----------
+  var SUPABASE_URL = 'https://twicgtjncvbhvgilaffb.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_LfDVNvJegvxllL0zLtKPYw_CyOZUqlF';
+
+  var COLORS = { 'Crypto': 'var(--c-crypto)', 'Memecoin': 'var(--c-meme)', 'Aandeel': 'var(--c-aandeel)', 'Index/ETF': 'var(--c-index)' };
+  var CATS = ['Crypto', 'Memecoin', 'Aandeel', 'Index/ETF'];
+  var GECKO = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', XRP: 'ripple', ADA: 'cardano', BNB: 'binancecoin', DOGE: 'dogecoin',
+    SHIB: 'shiba-inu', PEPE: 'pepe', BONK: 'bonk', WIF: 'dogwifcoin', FLOKI: 'floki', LINK: 'chainlink', DOT: 'polkadot', AVAX: 'avalanche-2',
+    LTC: 'litecoin', TRX: 'tron', TON: 'the-open-network', SUI: 'sui' };
+  var S = { sb: null, user: null, tx: [], assets: {}, live: {}, liveErr: {}, liveAt: null, type: 'Koop', soort: 'Crypto', priceTicker: null, positions: [] };
+  var $ = function (id) { return document.getElementById(id); };
+  var eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
+
+  function money(v) {
+    if (!v) return eur.format(0);
+    var a = Math.abs(v);
+    if (a < 0.01) return (v < 0 ? '-' : '') + '€ ' + a.toLocaleString('nl-NL', { maximumSignificantDigits: 4 });
+    if (a < 1) return (v < 0 ? '-' : '') + '€ ' + a.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 5 });
+    return eur.format(v);
+  }
+  function signed(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + money(Math.abs(v)); }
+  function pct(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v * 100).toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; }
+  function cls(v) { return v > 0.000001 ? 'pos' : v < -0.000001 ? 'neg' : ''; }
+  function qty(v) { return v.toLocaleString('nl-NL', { maximumFractionDigits: 8 }); }
+  function parseNum(s) { s = String(s || '').trim().replace(/\s/g, ''); if (!s) return NaN;
+    if (s.indexOf(',') > -1) s = s.replace(/\./g, '').replace(',', '.'); return Number(s); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function today() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0'); }
+  function daysAgo(iso) { if (!iso) return null; return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); }
+  function nlDate(d) { var p = String(d).split('-'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : d; }
+  function timeStr(iso) { return iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''; }
+  function toast(msg, err) { var t = $('toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = 'toast'; }, err ? 4500 : 2200); }
+  function guessSource(ticker, soort) {
+    if (soort === 'Aandeel' || soort === 'Index/ETF') return { bron: 'Aandeel/ETF', code: '' };
+    if (GECKO[ticker]) return { bron: 'Crypto', code: GECKO[ticker] };
+    return { bron: 'Handmatig', code: '' };
+  }
+
+  // ---------- Berekening (gemiddelde aankoopprijs) ----------
+  function koersVoor(k) {
+    var a = S.assets[k] || {};
+    if (a.bron && a.bron !== 'Handmatig' && S.live[k] > 0) return { prijs: S.live[k], soort: 'live' };
+    if (a.handmatig != null && a.handmatig >= 0) return { prijs: Number(a.handmatig), soort: 'hand', at: a.handmatig_at };
+    var last = S.tx.filter(function (t) { return t.ticker === k; }).slice(-1)[0];
+    return { prijs: last ? last.prijs : 0, soort: 'aankoop' };
+  }
+  function compute() {
+    var map = {};
+    S.tx.forEach(function (t) {
+      var p = map[t.ticker] || (map[t.ticker] = { ticker: t.ticker, soort: t.soort, gekocht: 0, betaald: 0, verkocht: 0, opbrengst: 0 });
+      p.soort = t.soort;
+      if (t.type === 'Koop') { p.gekocht += t.aantal; p.betaald += t.aantal * t.prijs + t.kosten; }
+      else { p.verkocht += t.aantal; p.opbrengst += t.aantal * t.prijs - t.kosten; }
+    });
+    return Object.keys(map).map(function (k) {
+      var p = map[k], gem = p.gekocht ? p.betaald / p.gekocht : 0, bezit = p.gekocht - p.verkocht;
+      if (Math.abs(bezit) < 1e-12) bezit = 0;
+      var kv = koersVoor(k), kost = bezit * gem, waarde = bezit * kv.prijs;
+      return { ticker: k, soort: p.soort, bezit: bezit, gem: gem, koers: kv.prijs, koersSoort: kv.soort, koersAt: kv.at,
+        kostprijs: kost, waarde: waarde, wv: waarde - kost, rendement: kost ? (waarde - kost) / kost : 0, gerealiseerd: p.opbrengst - p.verkocht * gem };
+    }).sort(function (a, b) { return b.waarde - a.waarde; });
+  }
+
+  function render() {
+    var pos = compute(); S.positions = pos;
+    var open = pos.filter(function (p) { return p.bezit > 0; });
+    var tot = 0, kost = 0, ger = 0, cats = {};
+    pos.forEach(function (p) { tot += p.waarde; kost += p.kostprijs; ger += p.gerealiseerd; cats[p.soort] = (cats[p.soort] || 0) + p.waarde; });
+    var ongereal = tot - kost, totWv = ongereal + ger;
+    $('totaal').textContent = money(tot);
+    var w = $('totaalWv');
+    if (!pos.length) { w.textContent = 'Nog geen posities'; w.className = 'chg'; }
+    else { w.textContent = signed(totWv) + ' totaal' + (kost ? ' · ' + pct(ongereal / kost) + ' op wat je nu hebt' : ''); w.className = 'chg num ' + cls(totWv); }
+    $('kostprijs').textContent = money(kost);
+    var g = $('gerealiseerd'); g.textContent = signed(ger); g.className = 'v num ' + cls(ger);
+
+    var bar = '', leg = '';
+    CATS.forEach(function (c) {
+      var share = tot > 0 ? (cats[c] || 0) / tot : 0;
+      if (share > 0) bar += '<span style="width:' + (share * 100) + '%;background:' + COLORS[c] + '"></span>';
+      leg += '<div><span class="dot" style="background:' + COLORS[c] + '"></span>' + c + '<span class="p num">' + Math.round(share * 100) + '%</span></div>';
+    });
+    $('alloc').innerHTML = bar; $('legend').innerHTML = leg;
+
+    var pl = $('posList');
+    if (!open.length) {
+      pl.innerHTML = '<div class="empty"><strong>' + (pos.length ? 'Alles verkocht.' : 'Nog geen posities.') + '</strong><br>Tik op <strong>+ Transactie</strong> om ' +
+        (pos.length ? 'een nieuwe aankoop' : 'je eerste aankoop') + ' toe te voegen.</div>';
+    } else {
+      pl.innerHTML = open.map(function (p) {
+        var chip = '';
+        if (p.koersSoort === 'live') chip = '<span class="chip live">live</span>';
+        else if (S.liveErr[p.ticker]) chip = '<span class="chip stale">koers mislukt</span>';
+        else if (p.koersSoort === 'aankoop') chip = '<span class="chip">aankoopkoers</span>';
+        else { var d = daysAgo(p.koersAt); if (d >= 2) chip = '<span class="chip stale">' + d + ' dagen oud</span>'; }
+        return '<button type="button" class="item" data-t="' + esc(p.ticker) + '">' +
+          '<span class="tk" style="background:' + COLORS[p.soort] + '">' + esc(p.ticker.slice(0, 4)) + '</span>' +
+          '<span class="mid"><span class="t">' + esc(p.ticker) + chip + '</span><span class="s num">' + qty(p.bezit) + ' × ' + money(p.koers) + '</span></span>' +
+          '<span class="right num"><span class="v" style="display:block">' + money(p.waarde) + '</span><span class="c ' + cls(p.wv) + '" style="display:block">' +
+          signed(p.wv) + (p.kostprijs ? ' (' + pct(p.rendement) + ')' : '') + '</span></span></button>';
+      }).join('');
+      Array.prototype.forEach.call(pl.querySelectorAll('.item'), function (el) { el.onclick = function () { openPrice(el.getAttribute('data-t')); }; });
+    }
+
+    var tl = $('txList');
+    if (!S.tx.length) tl.innerHTML = '<div class="empty">Hier komen al je aan- en verkopen te staan.</div>';
+    else {
+      tl.innerHTML = S.tx.slice().reverse().map(function (t) {
+        var total = t.type === 'Koop' ? t.aantal * t.prijs + t.kosten : t.aantal * t.prijs - t.kosten;
+        return '<div class="item"><span class="tk" style="background:' + COLORS[t.soort] + '">' + esc(t.ticker.slice(0, 4)) + '</span>' +
+          '<span class="mid"><span class="t"><span class="' + (t.type === 'Koop' ? 'buy' : 'sell') + '">' + t.type + '</span> ' + esc(t.ticker) + '</span>' +
+          '<span class="s num">' + nlDate(t.datum) + ' · ' + qty(t.aantal) + ' × ' + money(t.prijs) + (t.notitie ? ' · ' + esc(t.notitie) : '') + '</span></span>' +
+          '<span class="right num"><span class="v">' + money(total) + '</span></span>' +
+          '<button type="button" class="del" data-id="' + esc(t.id) + '">Wissen</button></div>';
+      }).join('');
+      Array.prototype.forEach.call(tl.querySelectorAll('.del'), function (b) {
+        b.onclick = function () {
+          if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'Zeker?';
+            setTimeout(function () { b.classList.remove('armed'); b.textContent = 'Wissen'; }, 3000); return; }
+          b.disabled = true;
+          S.sb.from('transactions').delete().eq('id', b.getAttribute('data-id')).then(function (r) {
+            if (r.error) { b.disabled = false; return toast('Wissen is niet gelukt. Probeer het opnieuw.', true); }
+            toast('Transactie gewist'); loadData();
+          });
+        };
+      });
+    }
+    $('tickers').innerHTML = pos.map(function (p) { return '<option value="' + esc(p.ticker) + '">'; }).join('');
+    $('status').textContent = S.liveAt ? 'Koersen ' + timeStr(S.liveAt) : '';
+  }
+
+  // ---------- Data ----------
+  async function loadData() {
+    var r1 = await S.sb.from('transactions').select('*').order('datum', { ascending: true }).order('created_at', { ascending: true });
+    var r2 = await S.sb.from('assets').select('*');
+    if (r1.error || r2.error) { toast('Je gegevens konden niet worden geladen. Ververs de pagina.', true); return; }
+    S.tx = r1.data.map(function (x) { return { id: x.id, type: x.type, soort: x.soort, ticker: x.ticker, aantal: Number(x.aantal), prijs: Number(x.prijs),
+      kosten: Number(x.kosten) || 0, datum: x.datum, notitie: x.notitie || '' }; });
+    S.assets = {};
+    r2.data.forEach(function (a) { S.assets[a.ticker] = { bron: a.bron, code: a.code || '', handmatig: a.handmatig == null ? null : Number(a.handmatig), handmatig_at: a.handmatig_at }; });
+    render();
+  }
+  async function refreshPrices(manual) {
+    var items = Object.keys(S.assets).filter(function (k) { var a = S.assets[k]; return a.bron !== 'Handmatig' && a.code; })
+      .map(function (k) { return { key: k, bron: S.assets[k].bron, code: S.assets[k].code }; });
+    if (!items.length) { if (manual) toast('Geen posities met automatische koers.'); return; }
+    $('refresh').classList.add('spin');
+    var r = await S.sb.functions.invoke('prices', { body: { items: items } });
+    $('refresh').classList.remove('spin');
+    if (r.error || !r.data || !r.data.prices) { toast('Koersen ophalen is niet gelukt. Probeer het zo opnieuw.', true); return; }
+    S.live = {}; S.liveErr = {};
+    Object.keys(r.data.prices).forEach(function (k) { var v = r.data.prices[k]; if (v && v.prijs > 0) S.live[k] = v.prijs; else S.liveErr[k] = (v && v.error) || 'onbekende fout'; });
+    S.liveAt = r.data.at;
+    try { localStorage.setItem('pt_live', JSON.stringify({ live: S.live, at: S.liveAt })); } catch (e) {}
+    render();
+    if (manual) toast(Object.keys(S.liveErr).length ? 'Bijgewerkt, ' + Object.keys(S.liveErr).length + ' koers(en) mislukt' : 'Koersen bijgewerkt');
+  }
+
+  // ---------- Tabs & sheets ----------
+  function tab(which) {
+    $('tabPos').setAttribute('aria-selected', which === 'pos'); $('tabTx').setAttribute('aria-selected', which === 'tx');
+    $('posList').hidden = which !== 'pos'; $('txList').hidden = which !== 'tx';
+  }
+  $('tabPos').onclick = function () { tab('pos'); };
+  $('tabTx').onclick = function () { tab('tx'); };
+  function openSheet(id) { $('scrim').classList.add('open'); $(id).classList.add('open'); }
+  function closeSheets() { $('scrim').classList.remove('open'); ['addSheet', 'priceSheet'].forEach(function (id) { $(id).classList.remove('open'); }); }
+  $('scrim').onclick = closeSheets;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.onclick = closeSheets; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheets(); });
+  function setSeg(id, key, v) { S[key] = v; Array.prototype.forEach.call($(id).querySelectorAll('button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); }); }
+  ['segType', 'segSoort'].forEach(function (id) {
+    var key = id === 'segType' ? 'type' : 'soort';
+    Array.prototype.forEach.call($(id).querySelectorAll('button'), function (b) { b.onclick = function () { setSeg(id, key, b.getAttribute('data-v')); updTotal(); }; });
+  });
+  function updTotal() {
+    var a = parseNum($('fAantal').value), p = parseNum($('fPrijs').value), k = parseNum($('fKosten').value) || 0;
+    var tot = (isFinite(a) && isFinite(p)) ? (S.type === 'Verkoop' ? a * p - k : a * p + k) : 0;
+    $('totLabel').textContent = S.type === 'Verkoop' ? 'Totaal ontvangen' : 'Totaal betaald';
+    $('fTotaal').textContent = money(tot);
+  }
+  ['fAantal', 'fPrijs', 'fKosten'].forEach(function (id) { $(id).addEventListener('input', updTotal); });
+  $('fTicker').addEventListener('input', function () {
+    var t = this.value.trim().toUpperCase();
+    var hit = S.positions.filter(function (p) { return p.ticker === t; })[0];
+    if (hit) setSeg('segSoort', 'soort', hit.soort);
+  });
+  $('fab').onclick = function () {
+    ['fTicker', 'fAantal', 'fPrijs', 'fKosten', 'fNotitie'].forEach(function (id) { $(id).value = ''; });
+    $('fDatum').value = today(); setSeg('segType', 'type', 'Koop'); updTotal(); openSheet('addSheet');
+    setTimeout(function () { $('fTicker').focus(); }, 260);
+  };
+
+  $('saveTx').onclick = async function () {
+    var ticker = $('fTicker').value.trim().toUpperCase().replace(/[^A-Z0-9._\-]/g, '').slice(0, 20);
+    var t = { type: S.type, soort: S.soort, ticker: ticker, aantal: parseNum($('fAantal').value), prijs: parseNum($('fPrijs').value),
+      kosten: parseNum($('fKosten').value) || 0, datum: $('fDatum').value || today(), notitie: $('fNotitie').value.trim().slice(0, 200) || null };
+    if (!ticker) return toast('Vul een ticker in, bijvoorbeeld BTC.', true);
+    if (!(t.aantal > 0)) return toast('Vul een aantal groter dan 0 in.', true);
+    if (!(t.prijs >= 0)) return toast('Vul een geldige prijs per stuk in.', true);
+    if (t.type === 'Verkoop') {
+      var held = (S.positions.filter(function (p) { return p.ticker === ticker; })[0] || {}).bezit || 0;
+      if (t.aantal > held + 1e-12) return toast('Je hebt maar ' + qty(held) + ' ' + ticker + '. Verkoop niet meer dan je hebt.', true);
+    }
+    var btn = this; btn.disabled = true; btn.textContent = 'Opslaan…';
+    var r = await S.sb.from('transactions').insert(t);
+    var isNew = !S.assets[ticker];
+    if (!r.error && isNew) {
+      var g = guessSource(ticker, t.soort);
+      await S.sb.from('assets').upsert({ ticker: ticker, bron: g.bron, code: g.code || null, handmatig: t.prijs, handmatig_at: new Date().toISOString() });
+    }
+    btn.disabled = false; btn.textContent = 'Opslaan';
+    if (r.error) return toast('Opslaan is niet gelukt. Probeer het opnieuw.', true);
+    closeSheets(); toast(t.type + ' ' + ticker + ' opgeslagen');
+    await loadData();
+    if (isNew) {
+      var a = S.assets[ticker];
+      if (a && (a.bron === 'Handmatig' || !a.code)) setTimeout(function () { openPrice(ticker); toast('Kies hoe ' + ticker + ' zijn koers krijgt'); }, 400);
+      else refreshPrices(false);
+    }
+  };
+
+  // ---------- Koers instellen ----------
+  var CODE_INFO = {
+    'Crypto': ['CoinGecko-id', 'bijv. bitcoin, ethereum, pepe', 'Staat in de link op coingecko.com: coingecko.com/nl/coins/pepe → pepe'],
+    'Memecoin': ['Netwerk:contractadres', 'bijv. solana:7GCi…', 'Kopieer het adres van dexscreener.com of uit je wallet. Netwerken: solana, ethereum, base, bsc, arbitrum.'],
+    'Aandeel/ETF': ['Yahoo-symbool', 'bijv. ASML.AS, VWRL.AS, AAPL', 'Amsterdamse beurs: ticker + .AS. Amerikaanse aandelen: alleen de ticker. Zoek het symbool op finance.yahoo.com.']
+  };
+  function syncBron() {
+    var b = $('pBron').value, info = CODE_INFO[b];
+    $('codeWrap').hidden = !info;
+    if (info) { $('pCodeLabel').textContent = info[0]; $('pCode').placeholder = info[1]; $('pCodeHint').textContent = info[2]; }
+    $('pHint').textContent = b === 'Handmatig' ? 'Deze koers gebruikt de tracker voor je waarde.' : 'Wordt alleen gebruikt als de automatische koers niet lukt.';
+  }
+  $('pBron').onchange = syncBron;
+  function openPrice(ticker) {
+    var p = S.positions.filter(function (x) { return x.ticker === ticker; })[0]; if (!p) return;
+    var a = S.assets[ticker] || guessSource(ticker, p.soort);
+    S.priceTicker = ticker;
+    $('pTitle').textContent = ticker;
+    $('pStats').innerHTML =
+      '<div><div class="l">In bezit</div><div class="v">' + qty(p.bezit) + '</div></div>' +
+      '<div><div class="l">Gem. aankoopprijs</div><div class="v">' + money(p.gem) + '</div></div>' +
+      '<div><div class="l">Huidige koers</div><div class="v">' + money(p.koers) + '</div></div>' +
+      '<div><div class="l">Winst/verlies</div><div class="v ' + cls(p.wv) + '">' + signed(p.wv) + '</div></div>';
+    var bron = a.bron || 'Handmatig';
+    if (bron === 'Handmatig' && (p.soort === 'Aandeel' || p.soort === 'Index/ETF')) bron = 'Aandeel/ETF';
+    $('pBron').value = bron;
+    $('pCode').value = a.code || '';
+    $('pPrijs').value = a.handmatig != null ? String(a.handmatig).replace('.', ',') : '';
+    $('pErr').hidden = !S.liveErr[ticker]; $('pErr').textContent = S.liveErr[ticker] ? 'Laatste poging mislukt: ' + S.liveErr[ticker] : '';
+    syncBron(); openSheet('priceSheet');
+  }
+  $('savePrice').onclick = async function () {
+    var bron = $('pBron').value, code = $('pCode').value.trim(), hand = parseNum($('pPrijs').value);
+    if (bron !== 'Handmatig' && !code) return toast('Vul de code in voor de automatische koers.', true);
+    if (bron === 'Handmatig' && !(hand >= 0)) return toast('Vul een geldige koers in.', true);
+    var row = { ticker: S.priceTicker, bron: bron, code: bron === 'Handmatig' ? null : code };
+    if (hand >= 0) { row.handmatig = hand; row.handmatig_at = new Date().toISOString(); }
+    var btn = this; btn.disabled = true;
+    var r = await S.sb.from('assets').upsert(row);
+    btn.disabled = false;
+    if (r.error) return toast('Opslaan is niet gelukt. Probeer het opnieuw.', true);
+    closeSheets(); toast('Koers ' + S.priceTicker + ' opgeslagen');
+    await loadData(); if (bron !== 'Handmatig') refreshPrices(false);
+  };
+  $('refresh').onclick = function () { refreshPrices(true); };
+
+  // ---------- Inloggen ----------
+  function show(view) {
+    $('loginView').hidden = view !== 'login'; $('appView').hidden = view !== 'app'; $('fab').hidden = view !== 'app';
+  }
+  $('lSend').onclick = async function () {
+    var email = $('lEmail').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { $('lMsg').textContent = 'Vul een geldig e-mailadres in.'; return; }
+    var btn = this; btn.disabled = true; $('lMsg').textContent = 'Versturen…';
+    var r = await S.sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + location.pathname } });
+    btn.disabled = false;
+    $('lMsg').textContent = r.error ? 'Versturen lukte niet: ' + r.error.message : 'Check je mail en tik op de inloglink. Je kunt dit venster sluiten.';
+  };
+  $('logout').onclick = async function () { await S.sb.auth.signOut(); };
+
+  async function start(session) {
+    if (!session) { S.user = null; show('login'); return; }
+    if (S.user && S.user.id === session.user.id) return;
+    S.user = session.user; show('app');
+    try { var c = JSON.parse(localStorage.getItem('pt_live') || 'null'); if (c && c.live) { S.live = c.live; S.liveAt = c.at; } } catch (e) {}
+    await loadData();
+    refreshPrices(false);
+  }
+
+  if (!window.supabase || SUPABASE_KEY.indexOf('PLAK_HIER') === 0) {
+    show('login');
+    $('lSend').disabled = true;
+    $('lMsg').textContent = 'De site is nog niet gekoppeld aan de database. Vul de publishable key in bij SUPABASE_KEY in index.html.';
+    return;
+  }
+  S.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  S.sb.auth.onAuthStateChange(function (_e, session) { setTimeout(function () { start(session); }, 0); });
+})();
+</script>
+</body>
+</html>
