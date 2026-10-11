@@ -173,6 +173,35 @@
   .login .hero h1 { font: 800 34px/1.05 var(--f-display); letter-spacing: -.03em; margin: 14px 0 8px; }
   .login .hero p { color: var(--hero-soft); margin: 0; position: relative; z-index: 1; }
   .login .card p { color: var(--muted); margin: 10px 0 0; font-size: 13px; }
+  /* Broker koppelen */
+  .connect-bar { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; border: 1px dashed var(--accent);
+    background: var(--card); color: var(--fg); font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow); }
+  .connect-bar.linked { border-style: solid; border-color: var(--line); }
+  .connect-bar .ic { width: 40px; height: 40px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff;
+    background: linear-gradient(135deg, var(--hero-2), var(--hero-1)); }
+  .connect-bar .ic svg { width: 20px; height: 20px; }
+  .connect-bar .tx { flex: 1; min-width: 0; }
+  .connect-bar .tx b { display: block; font: 700 15px/1.2 var(--f-display); }
+  .connect-bar .tx span { display: block; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .connect-bar .go { flex: none; font: 700 13px var(--f-body); color: var(--accent); }
+  .broker { border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin-bottom: 10px; }
+  .broker-top { display: flex; align-items: center; gap: 12px; }
+  .blogo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #fff; font: 800 13px var(--f-display); flex: none; }
+  .broker-top .mid b { display: block; font: 700 16px/1.2 var(--f-display); }
+  .broker-top .mid span { display: block; font-size: 12.5px; color: var(--muted); }
+  .broker-top .mid span.ok { color: var(--pos); font-weight: 600; }
+  .broker-top .mid span.bad { color: var(--neg); font-weight: 600; }
+  .small-btn { border: 1px solid var(--line); background: var(--sunk); color: var(--fg); border-radius: 11px; padding: 8px 12px; font: 700 13px var(--f-body); cursor: pointer; flex: none; }
+  .small-btn.main { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .small-btn.armed { background: var(--neg); border-color: var(--neg); color: #fff; }
+  .small-btn:disabled { opacity: .55; }
+  .broker-body { margin-top: 12px; }
+  .broker-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .steps { margin: 0 0 12px; padding-left: 20px; font-size: 13px; color: var(--muted); display: grid; gap: 5px; }
+  .steps b { color: var(--fg); }
+  .fout { font-size: 12.5px; color: var(--neg); background: var(--sunk); border-radius: 10px; padding: 8px 10px; margin-top: 10px; overflow-wrap: anywhere; }
+  .safe { font-size: 12px; color: var(--muted); background: var(--sunk); border-radius: 12px; padding: 10px 12px; margin: 4px 0 12px; }
+  input[type=file] { padding: 10px; font-size: 14px; }
   @media (max-width: 380px) { .alloc-wrap { grid-template-columns: 1fr; justify-items: center; } .legend { width: 100%; } }
 </style>
 </head>
@@ -205,6 +234,12 @@
       <button class="icon-btn" id="logout" type="button" aria-label="Uitloggen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
     </div>
   </header>
+
+  <button type="button" class="connect-bar" id="connectBar">
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7V3M15 7V3"/><path d="M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></svg></span>
+    <span class="tx"><b>Broker koppelen</b><span id="connectSub">Bitvavo, Interactive Brokers of DEGIRO – je posities komen er vanzelf in</span></span>
+    <span class="go" id="connectGo">Koppel ›</span>
+  </button>
 
   <section class="card hero" aria-label="Totaal">
     <div class="eyebrow">Totale waarde</div>
@@ -296,6 +331,78 @@
   <button class="ghost" type="button" data-close>Annuleren</button>
 </div>
 
+<div class="sheet" id="brokerSheet" role="dialog" aria-label="Broker koppelen">
+  <div class="grab"></div>
+  <h3>Broker koppelen</h3>
+  <div class="safe">Je posities worden automatisch opgehaald, je hoeft niks meer in te typen. Gebruik alleen sleutels met <b>leesrechten</b>: daarmee kan niemand handelen of geld opnemen. Sleutels worden versleuteld opgeslagen.</div>
+
+  <div class="broker" id="bk-bitvavo">
+    <div class="broker-top">
+      <span class="blogo" style="background:#0A3DF0">BV</span>
+      <span class="mid"><b>Bitvavo</b><span data-st>Crypto · automatisch elke paar minuten</span></span>
+      <button type="button" class="small-btn main" data-open>Koppelen</button>
+    </div>
+    <div class="broker-body" data-form hidden>
+      <ol class="steps">
+        <li>Log in op <b>bitvavo.com</b> en ga naar <b>Instellingen → API</b>.</li>
+        <li>Maak een nieuwe API-sleutel met alleen het recht <b>Bekijken / lezen</b>. Zet handelen en opnemen uit.</li>
+        <li>Laat het veld voor IP-adressen <b>leeg</b>.</li>
+        <li>Kopieer de API-key en het API-secret en plak ze hieronder. Het secret zie je maar één keer.</li>
+      </ol>
+      <label for="bvKey">API-key</label>
+      <input id="bvKey" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label for="bvSecret">API-secret</label>
+      <input id="bvSecret" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="hint">Bitvavo geeft met een leessleutel je saldo, maar niet je aankoopprijs. Winst/verlies zie je dus alleen bij posities die je zelf hebt ingevoerd.</div>
+      <button class="primary" type="button" data-connect="bitvavo">Bitvavo koppelen</button>
+    </div>
+    <div data-linked hidden></div>
+  </div>
+
+  <div class="broker" id="bk-ibkr">
+    <div class="broker-top">
+      <span class="blogo" style="background:#D81E2C">IB</span>
+      <span class="mid"><b>Interactive Brokers</b><span data-st>Aandelen en ETF's · posities 1× per dag</span></span>
+      <button type="button" class="small-btn main" data-open>Koppelen</button>
+    </div>
+    <div class="broker-body" data-form hidden>
+      <ol class="steps">
+        <li>Log in op de <b>Client Portal</b> en ga naar <b>Performance &amp; Reports → Flex Queries</b>.</li>
+        <li>Maak een nieuwe <b>Activity Flex Query</b>. Vink de sectie <b>Open Positions</b> aan (alle velden), kies formaat <b>XML</b> en periode <b>Last Business Day</b>. Sla op en noteer het <b>Query ID</b>.</li>
+        <li>Op dezelfde pagina: open <b>Flex Web Service Configuration</b>, zet hem aan en maak een <b>token</b> aan.</li>
+        <li>Plak het token en het Query ID hieronder.</li>
+      </ol>
+      <label for="ibToken">Flex-token</label>
+      <input id="ibToken" type="password" inputmode="numeric" autocomplete="off">
+      <label for="ibQuery">Query ID</label>
+      <input id="ibQuery" inputmode="numeric" autocomplete="off">
+      <div class="hint">Het token kan alleen rapporten lezen, niet handelen. IBKR maakt het rapport 1× per dag; koersen blijven wel live.</div>
+      <button class="primary" type="button" data-connect="ibkr">Interactive Brokers koppelen</button>
+    </div>
+    <div data-linked hidden></div>
+  </div>
+
+  <div class="broker" id="bk-degiro">
+    <div class="broker-top">
+      <span class="blogo" style="background:#00A2E1">DG</span>
+      <span class="mid"><b>DEGIRO</b><span data-st>Via een export van je transacties</span></span>
+      <button type="button" class="small-btn main" data-open>Importeren</button>
+    </div>
+    <div class="broker-body" data-form hidden>
+      <ol class="steps">
+        <li>DEGIRO heeft geen koppeling voor apps, dus het gaat met een bestand. Log in op <b>degiro.nl</b> (de website, niet de app).</li>
+        <li>Ga naar <b>Inbox → Transacties</b>, kies als periode vanaf je eerste aankoop en klik op <b>Exporteren → CSV</b>.</li>
+        <li>Kies dat bestand hieronder. Je kunt later een nieuwe export kiezen; dubbele transacties worden overgeslagen.</li>
+      </ol>
+      <label for="dgFile">Transacties.csv</label>
+      <input id="dgFile" type="file" accept=".csv,text/csv">
+      <div class="hint" id="dgMsg"></div>
+    </div>
+    <div data-linked hidden></div>
+  </div>
+  <button class="ghost" type="button" data-close>Sluiten</button>
+</div>
+
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -310,7 +417,9 @@
   var GECKO = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', XRP: 'ripple', ADA: 'cardano', BNB: 'binancecoin', DOGE: 'dogecoin',
     SHIB: 'shiba-inu', PEPE: 'pepe', BONK: 'bonk', WIF: 'dogwifcoin', FLOKI: 'floki', LINK: 'chainlink', DOT: 'polkadot', AVAX: 'avalanche-2',
     LTC: 'litecoin', TRX: 'tron', TON: 'the-open-network', SUI: 'sui' };
-  var S = { sb: null, user: null, tx: [], assets: {}, live: {}, liveOrig: {}, liveErr: {}, liveAt: null, type: 'Koop', soort: 'Crypto', priceTicker: null, positions: [] };
+  var S = { sb: null, user: null, tx: [], assets: {}, live: {}, liveOrig: {}, liveErr: {}, liveAt: null, type: 'Koop', soort: 'Crypto', priceTicker: null, priceKey: null, positions: [],
+    holdings: [], conns: {} };
+  var BROKERS = { bitvavo: 'Bitvavo', ibkr: 'Interactive Brokers', degiro: 'DEGIRO' };
   var $ = function (id) { return document.getElementById(id); };
   var eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
 
@@ -363,14 +472,25 @@
       if (t.type === 'Koop') { p.gekocht += t.aantal; p.betaald += t.aantal * t.prijs + t.kosten; }
       else { p.verkocht += t.aantal; p.opbrengst += t.aantal * t.prijs - t.kosten; }
     });
-    return Object.keys(map).map(function (k) {
+    var own = Object.keys(map).map(function (k) {
       var p = map[k], gem = p.gekocht ? p.betaald / p.gekocht : 0, bezit = p.gekocht - p.verkocht;
       if (Math.abs(bezit) < 1e-12) bezit = 0;
       var kv = koersVoor(k), kost = bezit * gem, waarde = bezit * kv.prijs;
-      return { ticker: k, soort: p.soort, bezit: bezit, gem: gem, koers: kv.prijs, koersSoort: kv.soort, koersAt: kv.at, orig: kv.orig,
+      return { key: k, ticker: k, broker: null, soort: p.soort, bezit: bezit, gem: gem, koers: kv.prijs, koersSoort: kv.soort, koersAt: kv.at, orig: kv.orig,
         kostprijs: kost, waarde: waarde, wv: waarde - kost, rendement: kost ? (waarde - kost) / kost : 0, gerealiseerd: p.opbrengst - p.verkocht * gem };
-    }).sort(function (a, b) { return b.waarde - a.waarde; });
+    });
+    var fromBroker = S.holdings.map(function (h) {
+      var a = S.assets[h.ticker] || {}, live = a.bron && a.bron !== 'Handmatig' && S.live[h.ticker] > 0;
+      var koers = live ? S.live[h.ticker] : (h.prijs || 0);
+      var orig = live ? S.liveOrig[h.ticker] : (h.orig > 0 && h.valuta && h.valuta !== 'EUR' ? { orig: h.orig, valuta: h.valuta } : null);
+      var noCost = !(h.kostprijs > 0), waarde = h.aantal * koers, kost = noCost ? 0 : h.kostprijs;
+      return { key: h.broker + ':' + h.ticker, ticker: h.ticker, naam: h.naam, broker: h.broker, soort: h.soort === 'Memecoin' ? 'Crypto' : h.soort,
+        bezit: h.aantal, gem: noCost ? null : kost / h.aantal, koers: koers, koersSoort: live ? 'live' : 'broker', koersAt: h.updated_at, orig: orig,
+        noCost: noCost, kostprijs: kost, waarde: waarde, wv: noCost ? 0 : waarde - kost, rendement: noCost ? 0 : (waarde - kost) / kost, gerealiseerd: 0 };
+    });
+    return own.concat(fromBroker).sort(function (a, b) { return b.waarde - a.waarde; });
   }
+  function ownPos(ticker) { return S.positions.filter(function (p) { return !p.broker && p.ticker === ticker; })[0]; }
 
   function donut(cats, tot) {
     var r = 46, c = 2 * Math.PI * r, off = 0, svg = '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="var(--sunk)" stroke-width="16"/>';
@@ -389,9 +509,9 @@
   function render() {
     var pos = compute(); S.positions = pos;
     var open = pos.filter(function (p) { return p.bezit > 0; });
-    var tot = 0, kost = 0, ger = 0, cats = {};
-    pos.forEach(function (p) { tot += p.waarde; kost += p.kostprijs; ger += p.gerealiseerd; cats[p.soort] = (cats[p.soort] || 0) + p.waarde; });
-    var ongereal = tot - kost, totWv = ongereal + ger;
+    var tot = 0, kost = 0, ger = 0, ongereal = 0, cats = {};
+    pos.forEach(function (p) { tot += p.waarde; kost += p.kostprijs; ger += p.gerealiseerd; ongereal += p.wv; cats[p.soort] = (cats[p.soort] || 0) + p.waarde; });
+    var totWv = ongereal + ger;
     $('totaal').textContent = money(tot);
     var w = $('totaalWv');
     if (!pos.length) { w.textContent = 'Nog geen posities'; w.className = 'pill'; $('totaalSub').textContent = ''; }
@@ -410,24 +530,26 @@
 
     var pl = $('posList');
     if (!open.length) {
-      pl.innerHTML = '<div class="empty"><strong>' + (pos.length ? 'Alles verkocht.' : 'Nog geen posities.') + '</strong><br>Tik op <strong>+ Transactie</strong> om ' +
+      pl.innerHTML = '<div class="empty"><strong>' + (pos.length ? 'Alles verkocht.' : 'Nog geen posities.') + '</strong><br>Koppel hierboven een broker, of tik op <strong>+ Transactie</strong> om ' +
         (pos.length ? 'een nieuwe aankoop' : 'je eerste aankoop') + ' toe te voegen.</div>';
     } else {
       pl.innerHTML = open.map(function (p) {
-        var chip = '';
-        if (p.koersSoort === 'live') chip = '<span class="chip live">live</span>';
+        var chip = p.broker ? '<span class="chip">' + BROKERS[p.broker] + '</span>' : '';
+        if (p.koersSoort === 'live') chip += '<span class="chip live">live</span>';
+        else if (p.koersSoort === 'broker') chip += '';
         else if (S.liveErr[p.ticker]) chip = '<span class="chip stale">koers mislukt</span>';
         else if (p.koersSoort === 'aankoop') chip = '<span class="chip">aankoopkoers</span>';
         else { var d = daysAgo(p.koersAt); if (d >= 2) chip = '<span class="chip stale">' + d + ' dagen oud</span>'; }
         var f = foreign(p.orig);
         var share = tot > 0 ? Math.max(p.waarde / tot * 100, 1) : 0;
-        return '<button type="button" class="item" data-t="' + esc(p.ticker) + '">' +
+        var change = p.noCost ? '<span class="c" style="color:var(--muted)">geen aankoopprijs</span>' :
+          '<span class="c ' + cls(p.wv) + '">' + signed(p.wv) + (p.kostprijs ? ' (' + pct(p.rendement) + ')' : '') + '</span>';
+        return '<button type="button" class="item" data-t="' + esc(p.key) + '">' +
           '<span class="tk" style="background:' + COLORS[p.soort] + '">' + esc(p.ticker.slice(0, 4)) + '</span>' +
           '<span class="mid"><span class="t">' + esc(p.ticker) + chip + '</span>' +
           '<span class="s num">' + qty(p.bezit) + ' × ' + money(p.koers) + (f ? ' (' + f + ')' : '') + '</span>' +
           '<span class="share"><span style="width:' + share + '%;background:' + COLORS[p.soort] + '"></span></span></span>' +
-          '<span class="right num"><span class="v">' + money(p.waarde) + '</span><span class="c ' + cls(p.wv) + '">' +
-          signed(p.wv) + (p.kostprijs ? ' (' + pct(p.rendement) + ')' : '') + '</span></span></button>';
+          '<span class="right num"><span class="v">' + money(p.waarde) + '</span>' + change + '</span></button>';
       }).join('');
       Array.prototype.forEach.call(pl.querySelectorAll('.item'), function (el) { el.onclick = function () { openPrice(el.getAttribute('data-t')); }; });
     }
@@ -455,7 +577,8 @@
         };
       });
     }
-    $('tickers').innerHTML = pos.map(function (p) { return '<option value="' + esc(p.ticker) + '">'; }).join('');
+    renderConnections();
+    $('tickers').innerHTML = pos.filter(function (p) { return !p.broker; }).map(function (p) { return '<option value="' + esc(p.ticker) + '">'; }).join('');
     $('status').textContent = S.liveAt ? timeStr(S.liveAt) : '';
   }
 
@@ -463,9 +586,16 @@
   async function loadData() {
     var r1 = await S.sb.from('transactions').select('*').order('datum', { ascending: true }).order('created_at', { ascending: true });
     var r2 = await S.sb.from('assets').select('*');
+    var r3 = await S.sb.from('broker_holdings').select('*');
+    var r4 = await S.sb.from('broker_connections').select('*');
     if (r1.error || r2.error) { toast('Je gegevens konden niet worden geladen. Ververs de pagina.', true); return; }
-    S.tx = r1.data.map(function (x) { return { id: x.id, type: x.type, soort: x.soort, ticker: x.ticker, aantal: Number(x.aantal), prijs: Number(x.prijs),
-      kosten: Number(x.kosten) || 0, datum: x.datum, notitie: x.notitie || '' }; });
+    S.tx = r1.data.map(function (x) { return { id: x.id, type: x.type, soort: x.soort === 'Memecoin' ? 'Crypto' : x.soort, ticker: x.ticker, aantal: Number(x.aantal), prijs: Number(x.prijs),
+      kosten: Number(x.kosten) || 0, datum: x.datum, notitie: x.notitie || '', extern: x.extern_id || '' }; });
+    S.holdings = (r3.data || []).map(function (h) { return { broker: h.broker, ticker: h.ticker, naam: h.naam || '', soort: h.soort, aantal: Number(h.aantal),
+      prijs: h.prijs == null ? null : Number(h.prijs), kostprijs: h.kostprijs == null ? null : Number(h.kostprijs), orig: h.orig == null ? null : Number(h.orig),
+      valuta: h.valuta, updated_at: h.updated_at }; });
+    S.conns = {};
+    (r4.data || []).forEach(function (c) { S.conns[c.broker] = c; });
     S.assets = {};
     r2.data.forEach(function (a) { S.assets[a.ticker] = { bron: a.bron, code: a.code || '', handmatig: a.handmatig == null ? null : Number(a.handmatig), handmatig_at: a.handmatig_at }; });
     render();
@@ -498,7 +628,7 @@
   $('tabPos').onclick = function () { tab('pos'); };
   $('tabTx').onclick = function () { tab('tx'); };
   function openSheet(id) { $('scrim').classList.add('open'); $(id).classList.add('open'); }
-  function closeSheets() { $('scrim').classList.remove('open'); ['addSheet', 'priceSheet'].forEach(function (id) { $(id).classList.remove('open'); }); if (typeof clearChart === 'function') setTimeout(clearChart, 260); }
+  function closeSheets() { $('scrim').classList.remove('open'); ['addSheet', 'priceSheet', 'brokerSheet'].forEach(function (id) { $(id).classList.remove('open'); }); if (typeof clearChart === 'function') setTimeout(clearChart, 260); }
   $('scrim').onclick = closeSheets;
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.onclick = closeSheets; });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheets(); });
@@ -516,7 +646,7 @@
   ['fAantal', 'fPrijs', 'fKosten'].forEach(function (id) { $(id).addEventListener('input', updTotal); });
   $('fTicker').addEventListener('input', function () {
     var t = this.value.trim().toUpperCase();
-    var hit = S.positions.filter(function (p) { return p.ticker === t; })[0];
+    var hit = ownPos(t);
     if (hit) setSeg('segSoort', 'soort', hit.soort);
   });
   $('fab').onclick = function () {
@@ -533,7 +663,7 @@
     if (!(t.aantal > 0)) return toast('Vul een aantal groter dan 0 in.', true);
     if (!(t.prijs >= 0)) return toast('Vul een geldige prijs per stuk in.', true);
     if (t.type === 'Verkoop') {
-      var held = (S.positions.filter(function (p) { return p.ticker === ticker; })[0] || {}).bezit || 0;
+      var held = (ownPos(ticker) || {}).bezit || 0;
       if (t.aantal > held + 1e-12) return toast('Je hebt maar ' + qty(held) + ' ' + ticker + '. Verkoop niet meer dan je hebt.', true);
     }
     var btn = this; btn.disabled = true; btn.textContent = 'Opslaan…';
@@ -566,17 +696,20 @@
     $('pHint').textContent = b === 'Handmatig' ? 'Deze koers gebruikt de tracker voor je waarde.' : 'Wordt alleen gebruikt als de automatische koers niet lukt.';
   }
   $('pBron').onchange = syncBron;
-  function openPrice(ticker) {
-    var p = S.positions.filter(function (x) { return x.ticker === ticker; })[0]; if (!p) return;
+  function openPrice(key) {
+    var p = S.positions.filter(function (x) { return x.key === key; })[0]; if (!p) return;
+    var ticker = p.ticker;
     var a = S.assets[ticker] || guessSource(ticker, p.soort);
-    S.priceTicker = ticker;
-    $('pTitle').textContent = ticker;
+    S.priceTicker = ticker; S.priceKey = key;
+    $('pTitle').textContent = ticker + (p.broker ? ' · ' + BROKERS[p.broker] : '');
     var f = foreign(p.orig);
     $('pStats').innerHTML =
       '<div><div class="l">In bezit</div><div class="v">' + qty(p.bezit) + '</div></div>' +
-      '<div><div class="l">Gem. aankoopprijs</div><div class="v">' + money(p.gem) + '</div></div>' +
+      '<div><div class="l">Gem. aankoopprijs</div><div class="v">' + (p.noCost ? 'onbekend' : money(p.gem)) + '</div></div>' +
       '<div><div class="l">Huidige koers</div><div class="v">' + money(p.koers) + (f ? ' <span style="color:var(--muted);font-weight:600">(' + f + ')</span>' : '') + '</div></div>' +
-      '<div><div class="l">Winst/verlies</div><div class="v ' + cls(p.wv) + '">' + signed(p.wv) + '</div></div>';
+      '<div><div class="l">Winst/verlies</div><div class="v ' + cls(p.wv) + '">' + (p.noCost ? '–' : signed(p.wv)) + '</div></div>' +
+      (p.broker ? '<div style="grid-column:1/-1"><div class="l">Bron</div><div class="v" style="font-weight:600">Automatisch via ' + BROKERS[p.broker] +
+        (p.naam ? ' · ' + esc(p.naam) : '') + '</div></div>' : '');
     var bron = a.bron || 'Handmatig';
     if (bron === 'Handmatig' && (p.soort === 'Aandeel' || p.soort === 'Index/ETF')) bron = 'Aandeel/ETF';
     $('pBron').value = bron;
@@ -614,7 +747,7 @@
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
   function loadChart() {
-    var t = S.priceTicker, p = S.positions.filter(function (x) { return x.ticker === t; })[0];
+    var t = S.priceTicker, p = S.positions.filter(function (x) { return x.key === S.priceKey; })[0];
     if (!p) return;
     var sym = tvSymbol(t, p.soort, S.assets[t]);
     $('tvSym').textContent = sym;
@@ -631,10 +764,215 @@
     box.appendChild(s);
     wrap.appendChild(box);
   }
-
   function clearChart() { $('tvWrap').innerHTML = '<div class="chart-msg">Grafiek laden…</div>'; }
 
-  $('refresh').onclick = function () { refreshPrices(true); };
+  // ---------- Brokers ----------
+  async function callBrokers(body) {
+    var r = await S.sb.functions.invoke('brokers', { body: body });
+    if (r.error) {
+      var msg = 'server niet bereikbaar';
+      try { var j = await r.error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
+      return { error: msg };
+    }
+    return r.data || { error: 'leeg antwoord' };
+  }
+  function degiroCount() { return S.tx.filter(function (t) { return t.extern.indexOf('degiro:') === 0; }).length; }
+  function holdCount(b) { return S.holdings.filter(function (h) { return h.broker === b; }).length; }
+  function agoStr(iso) {
+    if (!iso) return '';
+    var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (m < 1) return 'zojuist'; if (m < 60) return m + ' min geleden';
+    var d = new Date(iso), t = new Date();
+    return (d.toDateString() === t.toDateString() ? 'vandaag ' : nlDate(d.toISOString().slice(0, 10)) + ' ') + timeStr(iso);
+  }
+  function renderConnections() {
+    var linked = [];
+    ['bitvavo', 'ibkr', 'degiro'].forEach(function (b) {
+      var box = $('bk-' + b); if (!box) return;
+      var c = S.conns[b], isOn = b === 'degiro' ? degiroCount() > 0 : !!c;
+      var st = box.querySelector('[data-st]'), open = box.querySelector('[data-open]'), form = box.querySelector('[data-form]'), lk = box.querySelector('[data-linked]');
+      if (!isOn) {
+        st.className = ''; st.textContent = st.getAttribute('data-def') || st.textContent; st.setAttribute('data-def', st.textContent);
+        open.hidden = false; open.textContent = b === 'degiro' ? 'Importeren' : 'Koppelen'; lk.hidden = true; lk.innerHTML = ''; return;
+      }
+      linked.push(BROKERS[b]);
+      if (!st.getAttribute('data-def')) st.setAttribute('data-def', st.textContent);
+      open.hidden = b !== 'degiro'; if (b !== 'degiro') form.hidden = true;
+      open.textContent = 'Nieuwe export';
+      if (b === 'degiro') {
+        st.className = 'ok'; st.textContent = 'Geïmporteerd · ' + degiroCount() + ' transacties';
+        lk.hidden = false;
+        lk.innerHTML = '<div class="broker-acts"><button type="button" class="small-btn" data-wipe>Import wissen</button></div>';
+      } else {
+        var bad = c.status === 'fout';
+        st.className = bad ? 'bad' : 'ok';
+        st.textContent = (bad ? 'Probleem' : 'Gekoppeld') + ' · ' + holdCount(b) + (holdCount(b) === 1 ? ' positie · ' : ' posities · ') + agoStr(c.last_sync);
+        lk.hidden = false;
+        lk.innerHTML = (bad && c.fout ? '<div class="fout">' + esc(c.fout) + '</div>' : '') +
+          '<div class="broker-acts"><button type="button" class="small-btn main" data-sync>Nu bijwerken</button>' +
+          (bad ? '<button type="button" class="small-btn" data-reopen>Sleutel vervangen</button>' : '') +
+          '<button type="button" class="small-btn" data-unlink>Ontkoppelen</button></div>';
+      }
+      bindLinked(b, lk);
+    });
+    var bar = $('connectBar');
+    bar.classList.toggle('linked', linked.length > 0);
+    var bad = Object.keys(S.conns).filter(function (k) { return S.conns[k].status === 'fout'; });
+    $('connectSub').textContent = !linked.length ? 'Bitvavo, Interactive Brokers of DEGIRO – je posities komen er vanzelf in'
+      : bad.length ? 'Probleem met ' + bad.map(function (k) { return BROKERS[k]; }).join(', ') + ' – tik om te bekijken'
+      : 'Gekoppeld: ' + linked.join(', ');
+    $('connectGo').textContent = linked.length ? 'Beheer ›' : 'Koppel ›';
+    bar.querySelector('b').textContent = linked.length ? 'Koppelingen' : 'Broker koppelen';
+  }
+  function arm(btn, label, fn) {
+    if (!btn.classList.contains('armed')) {
+      btn.classList.add('armed'); var old = btn.textContent; btn.textContent = label;
+      setTimeout(function () { btn.classList.remove('armed'); btn.textContent = old; }, 3000); return;
+    }
+    fn();
+  }
+  function bindLinked(b, lk) {
+    var s = lk.querySelector('[data-sync]'), u = lk.querySelector('[data-unlink]'), w = lk.querySelector('[data-wipe]'), ro = lk.querySelector('[data-reopen]');
+    if (s) s.onclick = async function () {
+      s.disabled = true; s.textContent = b === 'ibkr' ? 'Rapport ophalen… (tot 30 sec)' : 'Bijwerken…';
+      var r = await callBrokers({ action: 'sync', force: true });
+      await loadData(); refreshPrices(false);
+      var res = r && r.result ? r.result[b] : null;
+      if (r.error) toast('Bijwerken mislukt: ' + r.error, true);
+      else if (res === 'recent') toast(b === 'ibkr' ? 'Net al bijgewerkt. IBKR kan 1× per 30 minuten.' : 'Net al bijgewerkt, probeer het over een minuut.');
+      else if (res === 'fout') toast('Bijwerken mislukt, zie de melding.', true);
+      else toast(BROKERS[b] + ' bijgewerkt');
+    };
+    if (ro) ro.onclick = function () { $('bk-' + b).querySelector('[data-form]').hidden = false; };
+    if (u) u.onclick = function () {
+      arm(u, 'Zeker? Tik nog eens', async function () {
+        u.disabled = true;
+        var r = await callBrokers({ action: 'disconnect', broker: b });
+        if (r.error) { u.disabled = false; return toast('Ontkoppelen mislukt: ' + r.error, true); }
+        toast(BROKERS[b] + ' ontkoppeld, sleutel verwijderd'); loadData();
+      });
+    };
+    if (w) w.onclick = function () {
+      arm(w, 'Alle DEGIRO-transacties wissen?', async function () {
+        w.disabled = true;
+        var r = await S.sb.from('transactions').delete().like('extern_id', 'degiro:%');
+        if (r.error) { w.disabled = false; return toast('Wissen mislukt. Probeer het opnieuw.', true); }
+        toast('DEGIRO-import gewist'); loadData();
+      });
+    };
+  }
+  $('connectBar').onclick = function () { renderConnections(); openSheet('brokerSheet'); };
+  Array.prototype.forEach.call(document.querySelectorAll('#brokerSheet [data-open]'), function (b) {
+    b.onclick = function () { var f = b.closest('.broker').querySelector('[data-form]'); f.hidden = !f.hidden; };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-connect]'), function (btn) {
+    btn.onclick = async function () {
+      var b = btn.getAttribute('data-connect'), body = { action: 'connect', broker: b };
+      if (b === 'bitvavo') { body.key = $('bvKey').value.trim(); body.secret = $('bvSecret').value.trim();
+        if (!body.key || !body.secret) return toast('Vul de API-key en het API-secret in.', true); }
+      else { body.token = $('ibToken').value.trim(); body.queryId = $('ibQuery').value.trim();
+        if (!body.token || !body.queryId) return toast('Vul het token en het Query ID in.', true); }
+      var old = btn.textContent; btn.disabled = true;
+      btn.textContent = b === 'ibkr' ? 'Rapport ophalen bij IBKR… (tot 30 sec)' : 'Verbinden…';
+      var r = await callBrokers(body);
+      btn.disabled = false; btn.textContent = old;
+      if (r.error) return toast(r.error, true);
+      ['bvKey', 'bvSecret', 'ibToken', 'ibQuery'].forEach(function (id) { $(id).value = ''; });
+      $('bk-' + b).querySelector('[data-form]').hidden = true;
+      toast(BROKERS[b] + ' gekoppeld · ' + r.count + ' posities gevonden');
+      await loadData(); refreshPrices(false);
+    };
+  });
+  async function syncBrokers(force) {
+    if (!Object.keys(S.conns).length) return;
+    var r = await callBrokers({ action: 'sync', force: !!force });
+    if (r && r.result && Object.keys(r.result).some(function (k) { return r.result[k] !== 'recent'; })) { await loadData(); refreshPrices(false); }
+  }
+
+  // ---------- DEGIRO-import (CSV) ----------
+  function parseCSV(text) {
+    text = text.replace(/^\uFEFF/, '');
+    var first = text.split(/\r?\n/)[0] || '', delim = (first.split(';').length > first.split(',').length) ? ';' : ',';
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+      else cur += ch;
+    }
+    if (cur || row.length) { row.push(cur); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (c) { return c.trim(); }); });
+  }
+  function num2(s) {
+    s = String(s || '').trim().replace(/\s/g, '').replace(/[^\d,.\-]/g, ''); if (!s) return NaN;
+    var c = s.lastIndexOf(','), d = s.lastIndexOf('.');
+    if (c > d) s = s.replace(/\./g, '').replace(',', '.'); else s = s.replace(/,/g, '');
+    return Number(s);
+  }
+  function findCol(h, re, not) { for (var i = 0; i < h.length; i++) { var v = h[i].trim(); if (re.test(v) && !(not && not.test(v))) return i; } return -1; }
+  $('dgFile').onchange = async function () {
+    var file = this.files && this.files[0], input = this; if (!file) return;
+    var msg = $('dgMsg'); msg.textContent = 'Bestand lezen…';
+    try {
+      var rows = parseCSV(await file.text());
+      var h = rows[0] || [];
+      var c = { datum: findCol(h, /^(datum|date)$/i), tijd: findCol(h, /^(tijd|time)$/i), product: findCol(h, /^product$/i), isin: findCol(h, /^isin$/i),
+        beurs: findCol(h, /^(beurs|reference exchange|reference)$/i), aantal: findCol(h, /^(aantal|quantity|number)$/i), koers: findCol(h, /^(koers|price)$/i),
+        waarde: findCol(h, /^(waarde|value)$/i), kosten: findCol(h, /transactiekosten|transaction/i), order: findCol(h, /order/i) };
+      if (c.datum < 0 || c.isin < 0 || c.aantal < 0 || c.koers < 0) throw new Error('Dit lijkt geen DEGIRO-transactie-export. Kies Inbox → Transacties → Exporteren → CSV.');
+      var list = rows.slice(1).map(function (r) {
+        var n = num2(r[c.aantal]), koers = num2(r[c.koers]), val = c.waarde > -1 ? num2(r[c.waarde]) : NaN;
+        var cur = (r[c.koers + 1] || '').trim().toUpperCase();
+        var prijs = isFinite(val) && val !== 0 ? Math.abs(val) / Math.abs(n) : (cur === 'EUR' || !cur ? koers : NaN);
+        var dp = String(r[c.datum] || '').trim().split(/[-\/.]/), datum = dp.length === 3 ? (dp[2].length === 4 ? dp[2] + '-' + dp[1].padStart(2, '0') + '-' + dp[0].padStart(2, '0') : dp.join('-')) : '';
+        return { isin: String(r[c.isin] || '').trim().toUpperCase(), beurs: c.beurs > -1 ? String(r[c.beurs] || '').trim() : '', product: String(r[c.product] || '').trim(),
+          aantal: n, prijs: prijs, kosten: c.kosten > -1 ? Math.abs(num2(r[c.kosten])) || 0 : 0, datum: datum, tijd: c.tijd > -1 ? String(r[c.tijd] || '').trim() : '',
+          order: c.order > -1 ? String(r[c.order] || '').trim() : '' };
+      }).filter(function (t) { return /^[A-Z]{2}[A-Z0-9]{9}\d$/.test(t.isin) && isFinite(t.aantal) && t.aantal !== 0 && t.prijs >= 0 && /^\d{4}-\d{2}-\d{2}$/.test(t.datum); });
+      if (!list.length) throw new Error('Geen aan- of verkopen gevonden in dit bestand.');
+      var isins = {}; list.forEach(function (t) { isins[t.isin] = t.beurs; });
+      var keys = Object.keys(isins), found = {};
+      msg.textContent = list.length + ' transacties gevonden, ' + keys.length + ' producten opzoeken…';
+      for (var i = 0; i < keys.length; i += 80) {
+        var r = await callBrokers({ action: 'isin', items: keys.slice(i, i + 80).map(function (k) { return { isin: k, beurs: isins[k] }; }) });
+        if (r.error) throw new Error('Opzoeken mislukt: ' + r.error);
+        Object.keys(r.results || {}).forEach(function (k) { if (r.results[k]) found[k] = r.results[k]; });
+      }
+      var have = {}; S.tx.forEach(function (t) { if (t.extern) have[t.extern] = 1; });
+      var assets = {}, rowsOut = [], unknown = {};
+      list.forEach(function (t) {
+        var f = found[t.isin], ticker, soort;
+        if (f) { ticker = f.symbol.split('.')[0].replace(/[^A-Z0-9\-]/g, '').slice(0, 20); soort = f.soort;
+          if (!assets[ticker]) assets[ticker] = { user_id: S.user.id, ticker: ticker, bron: 'Aandeel/ETF', code: f.symbol }; }
+        else { ticker = (t.product.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) || t.isin); soort = 'Aandeel'; unknown[ticker] = 1;
+          assets[ticker] = { user_id: S.user.id, ticker: ticker, bron: 'Handmatig', code: null, handmatig: t.prijs, handmatig_at: new Date().toISOString() }; }
+        var ext = 'degiro:' + (t.order || t.isin) + ':' + t.datum + ' ' + t.tijd + ':' + t.aantal + ':' + t.prijs.toFixed(6);
+        if (have[ext]) return; have[ext] = 1;
+        rowsOut.push({ user_id: S.user.id, extern_id: ext, type: t.aantal > 0 ? 'Koop' : 'Verkoop', soort: soort, ticker: ticker, aantal: Math.abs(t.aantal),
+          prijs: Math.round(t.prijs * 1e6) / 1e6, kosten: t.kosten, datum: t.datum, notitie: ('DEGIRO · ' + t.product).slice(0, 200) });
+      });
+      rowsOut.sort(function (a, b) { return a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0; });
+      msg.textContent = 'Opslaan…';
+      for (var j = 0; j < rowsOut.length; j += 200) {
+        var w = await S.sb.from('transactions').upsert(rowsOut.slice(j, j + 200), { onConflict: 'user_id,extern_id', ignoreDuplicates: true });
+        if (w.error) throw new Error('Opslaan mislukt: ' + w.error.message);
+      }
+      var al = Object.keys(assets).map(function (k) { return assets[k]; });
+      if (al.length) await S.sb.from('assets').upsert(al, { onConflict: 'user_id,ticker', ignoreDuplicates: true });
+      var nu = Object.keys(unknown).length;
+      msg.textContent = rowsOut.length ? rowsOut.length + ' nieuwe transacties geïmporteerd' + (list.length > rowsOut.length ? ', ' + (list.length - rowsOut.length) + ' stonden er al' : '') + '.' +
+        (nu ? ' ' + nu + ' product(en) niet herkend: die krijgen een handmatige koers.' : '') : 'Alles uit dit bestand stond er al in.';
+      toast(rowsOut.length ? 'DEGIRO: ' + rowsOut.length + ' transacties toegevoegd' : 'Niks nieuws in dit bestand');
+      await loadData(); refreshPrices(false);
+    } catch (e) {
+      msg.textContent = e.message || String(e); toast(e.message || 'Importeren mislukt', true);
+    }
+    input.value = '';
+  };
+
+  $('refresh').onclick = function () { refreshPrices(true); syncBrokers(true); };
 
   // ---------- Inloggen ----------
   function show(view) {
@@ -657,6 +995,7 @@
     try { var c = JSON.parse(localStorage.getItem('pt_live') || 'null'); if (c && c.live) { S.live = c.live; S.liveOrig = c.orig || {}; S.liveAt = c.at; } } catch (e) {}
     await loadData();
     refreshPrices(false);
+    syncBrokers(false);
   }
 
   if (!window.supabase || SUPABASE_KEY.indexOf('PLAK_HIER') === 0) {
