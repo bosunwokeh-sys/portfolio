@@ -19,6 +19,7 @@
     --hero-1: #0D1D38; --hero-2: #1B437F; --hero-glow: rgba(72, 140, 255, .55); --hero-ink: #FFFFFF; --hero-soft: rgba(255,255,255,.72); --hero-tile: rgba(255,255,255,.10);
     --pos: #0A8A52; --neg: #C8352A; --pos-hero: #6EF0AE; --neg-hero: #FF9C93;
     --c-crypto: #E39A12; --c-aandeel: #3270DE; --c-index: #10A08A;
+    --c-spaar: #7357E8; --c-vastgoed: #CF4A78; --c-pensioen: #4F7896; --c-overig: #8B95A7; --c-schuld: #C8352A;
     --shadow: 0 1px 2px rgba(15,26,43,.05), 0 10px 30px rgba(15,26,43,.07);
     --scrim: rgba(8,14,26,.5);
     --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
@@ -31,6 +32,7 @@
       --hero-1: #0B1830; --hero-2: #1A3D73; --hero-glow: rgba(72, 140, 255, .45);
       --pos: #3FD58E; --neg: #FF7B70;
       --c-crypto: #F2AE2E; --c-aandeel: #5E93F2; --c-index: #2CC2A9;
+      --c-spaar: #9C86FF; --c-vastgoed: #F07AA3; --c-pensioen: #7FA6C4; --c-overig: #A3ADBE; --c-schuld: #FF7B70;
       --shadow: none; --scrim: rgba(0,0,0,.65);
       color-scheme: dark;
     }
@@ -41,6 +43,7 @@
     --hero-1: #0B1830; --hero-2: #1A3D73; --hero-glow: rgba(72, 140, 255, .45);
     --pos: #3FD58E; --neg: #FF7B70;
     --c-crypto: #F2AE2E; --c-aandeel: #5E93F2; --c-index: #2CC2A9;
+      --c-spaar: #9C86FF; --c-vastgoed: #F07AA3; --c-pensioen: #7FA6C4; --c-overig: #A3ADBE; --c-schuld: #FF7B70;
     --shadow: none; --scrim: rgba(0,0,0,.65);
     color-scheme: dark;
   }
@@ -76,7 +79,8 @@
   .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 99px; font-weight: 700; font-size: 13px; background: var(--hero-tile); }
   .pill.pos { color: var(--pos-hero); } .pill.neg { color: var(--neg-hero); }
   .pill-sub { color: var(--hero-soft); font-size: 13px; margin-left: 8px; }
-  .kpis { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .kpis { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+  .kpi .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .kpi { background: var(--hero-tile); border-radius: 14px; padding: 10px 12px; min-width: 0; backdrop-filter: blur(4px); }
   .kpi .l { font-size: 12px; color: var(--hero-soft); }
   .kpi .v { font-weight: 700; font-size: 16px; }
@@ -95,7 +99,7 @@
   .legend .name { flex: 1; min-width: 0; }
   .legend .p { color: var(--muted); font-weight: 600; }
 
-  .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 4px; box-shadow: var(--shadow); }
+  .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 4px; box-shadow: var(--shadow); }
   .tabs button { border: 0; background: transparent; color: var(--muted); font: 700 14px var(--f-body); padding: 11px; border-radius: 12px; cursor: pointer; }
   .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 
@@ -173,6 +177,28 @@
   .login .hero h1 { font: 800 34px/1.05 var(--f-display); letter-spacing: -.03em; margin: 14px 0 8px; }
   .login .hero p { color: var(--hero-soft); margin: 0; position: relative; z-index: 1; }
   .login .card p { color: var(--muted); margin: 10px 0 0; font-size: 13px; }
+  /* Rendement */
+  .ret-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .ret-big { font: 800 34px/1 var(--f-display); letter-spacing: -.02em; }
+  .ret-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .ret-side { text-align: right; }
+  .ret-side .v { font: 700 18px var(--f-display); }
+  .ledger { display: grid; border-top: 1px solid var(--line); }
+  .ledger > div { display: flex; justify-content: space-between; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .ledger > div span:first-child { color: var(--muted); }
+  .ledger > div.sum { font-weight: 800; border-bottom: 0; font-size: 15px; }
+  .ledger > div.sum span:first-child { color: var(--fg); }
+  .ledger > div.dim { font-size: 12.5px; }
+  .how { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+  .how summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+  .how p { margin: 8px 0 0; }
+  /* Vermogen */
+  .wsec { font: 700 12px var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 14px 0 2px; }
+  .wsum { display: flex; justify-content: space-between; padding: 12px 0; font-weight: 800; border-top: 2px solid var(--line); }
+  .seg.rich button.on[data-v="schuld"] { color: var(--neg); }
+  textarea { width: 100%; font: inherit; font-size: 16px; color: var(--fg); background: var(--sunk); border: 1px solid var(--line); border-radius: 13px; padding: 12px; margin-bottom: 12px; resize: vertical; }
+  .del-wide { width: 100%; border: 1px solid var(--line); background: transparent; color: var(--neg); border-radius: 15px; padding: 12px; font: 600 15px var(--f-body); cursor: pointer; margin-top: 6px; }
+  .del-wide.armed { background: var(--neg); color: #fff; border-color: var(--neg); }
   /* Broker koppelen */
   .connect-bar { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; border: 1px dashed var(--accent);
     background: var(--card); color: var(--fg); font: inherit; text-align: left; cursor: pointer; box-shadow: var(--shadow); }
@@ -242,17 +268,32 @@
   </button>
 
   <section class="card hero" aria-label="Totaal">
-    <div class="eyebrow">Totale waarde</div>
+    <div class="eyebrow">Nettovermogen</div>
     <div class="big num" id="totaal">€ 0,00</div>
     <div><span class="pill num" id="totaalWv">Nog geen posities</span><span class="pill-sub num" id="totaalSub"></span></div>
     <div class="kpis">
-      <div class="kpi"><div class="l">Betaald voor wat je hebt</div><div class="v num" id="kostprijs">€ 0,00</div></div>
-      <div class="kpi"><div class="l">Gerealiseerd (verkocht)</div><div class="v num" id="gerealiseerd">€ 0,00</div></div>
+      <div class="kpi"><div class="l">Beleggingen</div><div class="v num" id="kBeleg">€ 0,00</div></div>
+      <div class="kpi"><div class="l">Bezittingen</div><div class="v num" id="kBezit">€ 0,00</div></div>
+      <div class="kpi"><div class="l">Schulden</div><div class="v num" id="kSchuld">€ 0,00</div></div>
     </div>
   </section>
 
+  <section class="card" aria-label="Rendement">
+    <div class="row-head"><strong>Echt rendement</strong><span class="status">na kosten</span></div>
+    <div class="ret-top">
+      <div><div class="ret-big num" id="retPct">–</div><div class="ret-lbl" id="retLbl">Voeg aankopen toe om je rendement te zien</div></div>
+      <div class="ret-side"><div class="ret-lbl">Totale winst</div><div class="v num" id="retTot">€ 0,00</div></div>
+    </div>
+    <div class="ledger num" id="ledger"></div>
+    <details class="how"><summary>Hoe rekenen we dit?</summary>
+      <p><b>Totale winst</b> = koerswinst op wat je nog hebt + winst op wat je verkocht hebt + dividend na belasting. Transactiekosten zitten al in je aankoop- en verkoopprijs, dus alles is na kosten.</p>
+      <p><b>Het percentage</b> is geld-gewogen (XIRR): het houdt rekening met wanneer je geld erin stopte of eruit haalde. Een aankoop van vorige week trekt je jaarrendement dus niet omlaag. Korter dan een jaar bezig? Dan zie je het rendement over die periode, niet omgerekend naar een jaar.</p>
+      <p>Posities van een broker zonder aankoopprijs of datum (zoals je Bitvavo-saldo) tellen mee in je vermogen, maar niet in je winst of percentage.</p>
+    </details>
+  </section>
+
   <section class="card" aria-label="Verdeling">
-    <div class="row-head"><strong>Verdeling</strong><span class="status">per soort</span></div>
+    <div class="row-head"><strong>Verdeling</strong><span class="status">van al je bezittingen</span></div>
     <div class="alloc-wrap">
       <svg class="donut" id="donut" viewBox="0 0 120 120" role="img" aria-label="Verdeling per soort"></svg>
       <div class="legend" id="legend"></div>
@@ -261,9 +302,11 @@
 
   <div class="tabs" role="tablist">
     <button role="tab" id="tabPos" aria-selected="true">Posities</button>
+    <button role="tab" id="tabW" aria-selected="false">Vermogen</button>
     <button role="tab" id="tabTx" aria-selected="false">Geschiedenis</button>
   </div>
   <section class="card list" id="posList" aria-label="Posities"></section>
+  <section class="card list" id="wList" aria-label="Vermogen" hidden></section>
   <section class="card list" id="txList" aria-label="Geschiedenis" hidden></section>
   <p class="notice">Koersen via CoinGecko en Yahoo Finance, omgerekend naar euro; grafieken van TradingView. Koersen kunnen enkele minuten vertraagd zijn. Hulpmiddel voor je overzicht, geen financieel advies.</p>
 </div>
@@ -277,6 +320,7 @@
   <div class="seg type" id="segType">
     <button type="button" data-v="Koop" class="on">Koop</button>
     <button type="button" data-v="Verkoop">Verkoop</button>
+    <button type="button" data-v="Dividend">Dividend</button>
   </div>
   <div class="seg" id="segSoort">
     <button type="button" data-v="Crypto" class="on">Crypto</button>
@@ -286,13 +330,13 @@
   <label for="fTicker">Ticker</label>
   <input id="fTicker" placeholder="bijv. BTC, ETH, SPCX" autocapitalize="characters" autocomplete="off" list="tickers">
   <datalist id="tickers"></datalist>
-  <div class="two">
-    <div><label for="fAantal">Aantal</label><input id="fAantal" inputmode="decimal" placeholder="0"></div>
-    <div><label for="fPrijs">Prijs per stuk in €</label><input id="fPrijs" inputmode="decimal" placeholder="0,00"></div>
+  <div class="two" id="fRow1">
+    <div id="fAantalWrap"><label for="fAantal">Aantal</label><input id="fAantal" inputmode="decimal" placeholder="0"></div>
+    <div><label for="fPrijs" id="lPrijs">Prijs per stuk in €</label><input id="fPrijs" inputmode="decimal" placeholder="0,00"></div>
   </div>
-  <div class="hint">Vul de prijs in euro in, zoals je broker of exchange hem afrekende.</div>
+  <div class="hint" id="fHint">Vul de prijs in euro in, zoals je broker of exchange hem afrekende.</div>
   <div class="two">
-    <div><label for="fKosten">Kosten in €</label><input id="fKosten" inputmode="decimal" placeholder="0,00"></div>
+    <div><label for="fKosten" id="lKosten">Kosten in €</label><input id="fKosten" inputmode="decimal" placeholder="0,00"></div>
     <div><label for="fDatum">Datum</label><input id="fDatum" type="date"></div>
   </div>
   <label for="fNotitie">Notitie (optioneel)</label>
@@ -328,6 +372,27 @@
     <div class="hint" id="pHint"></div>
   </div>
   <button class="primary" id="savePrice" type="button">Opslaan</button>
+  <button class="ghost" type="button" data-close>Annuleren</button>
+</div>
+
+<div class="sheet" id="wSheet" role="dialog" aria-label="Bezitting of schuld">
+  <div class="grab"></div>
+  <h3 id="wTitle">Toevoegen</h3>
+  <div class="seg rich" id="segRich">
+    <button type="button" data-v="bezit" class="on">Bezitting</button>
+    <button type="button" data-v="schuld">Schuld</button>
+  </div>
+  <label for="wSoort">Soort</label>
+  <select id="wSoort"></select>
+  <label for="wNaam">Naam</label>
+  <input id="wNaam" maxlength="60" autocomplete="off" placeholder="bijv. Spaarrekening">
+  <label for="wWaarde" id="wWaardeLbl">Waarde in €</label>
+  <input id="wWaarde" inputmode="decimal" placeholder="0,00">
+  <div class="hint" id="wHint"></div>
+  <label for="wNotitie">Notitie (optioneel)</label>
+  <input id="wNotitie" maxlength="200" autocomplete="off">
+  <button class="primary" id="wSave" type="button">Opslaan</button>
+  <button class="del-wide" id="wDel" type="button" hidden>Verwijderen</button>
   <button class="ghost" type="button" data-close>Annuleren</button>
 </div>
 
@@ -412,13 +477,27 @@
   var SUPABASE_URL = 'https://twicgtjncvbhvgilaffb.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_LfDVNvJegvxllL0zLtKPYw_CyOZUqlF';
 
-  var COLORS = { 'Crypto': 'var(--c-crypto)', 'Memecoin': 'var(--c-crypto)', 'Aandeel': 'var(--c-aandeel)', 'Index/ETF': 'var(--c-index)' };
+  var COLORS = { 'Crypto': 'var(--c-crypto)', 'Memecoin': 'var(--c-crypto)', 'Aandeel': 'var(--c-aandeel)', 'Index/ETF': 'var(--c-index)',
+    'Spaargeld': 'var(--c-spaar)', 'Vastgoed': 'var(--c-vastgoed)', 'Pensioen': 'var(--c-pensioen)', 'Bedrijf': 'var(--c-overig)', 'Overig': 'var(--c-overig)',
+    'Hypotheek': 'var(--c-schuld)', 'Studieschuld': 'var(--c-schuld)', 'Lening': 'var(--c-schuld)' };
   var CATS = ['Crypto', 'Aandeel', 'Index/ETF'];
+  var ALLCATS = ['Crypto', 'Aandeel', 'Index/ETF', 'Spaargeld', 'Vastgoed', 'Pensioen', 'Overig'];
+  var WSOORT = { bezit: ['Spaargeld', 'Vastgoed', 'Pensioen', 'Bedrijf', 'Overig'], schuld: ['Hypotheek', 'Studieschuld', 'Lening', 'Overig'] };
+  var WTILE = { Spaargeld: 'SPAAR', Vastgoed: 'HUIS', Pensioen: 'PENS', Bedrijf: 'BEDR', Overig: 'OVER', Hypotheek: 'HYPO', Studieschuld: 'DUO', Lening: 'LEEN' };
+  var WHINT = {
+    Spaargeld: 'Het saldo van je spaar- of betaalrekening.',
+    Vastgoed: 'Schat de marktwaarde, bijvoorbeeld met je WOZ-waarde. Je hypotheek voeg je apart toe als schuld.',
+    Pensioen: 'Kijk bij je pensioenfonds of op mijnpensioenoverzicht.nl. Vul de huidige waarde in als je die weet; een schatting mag.',
+    Bedrijf: 'Wat jouw deel van het bedrijf ongeveer waard is.',
+    Overig: 'Een schatting is prima. Werk hem af en toe bij.',
+    Hypotheek: 'Wat je nu nog moet aflossen, niet het oorspronkelijke bedrag.',
+    Studieschuld: 'Je openstaande schuld staat op mijn.duo.nl.',
+    Lening: 'Wat je nu nog moet terugbetalen.' };
   var GECKO = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', XRP: 'ripple', ADA: 'cardano', BNB: 'binancecoin', DOGE: 'dogecoin',
     SHIB: 'shiba-inu', PEPE: 'pepe', BONK: 'bonk', WIF: 'dogwifcoin', FLOKI: 'floki', LINK: 'chainlink', DOT: 'polkadot', AVAX: 'avalanche-2',
     LTC: 'litecoin', TRX: 'tron', TON: 'the-open-network', SUI: 'sui' };
   var S = { sb: null, user: null, tx: [], assets: {}, live: {}, liveOrig: {}, liveErr: {}, liveAt: null, type: 'Koop', soort: 'Crypto', priceTicker: null, priceKey: null, positions: [],
-    holdings: [], conns: {} };
+    holdings: [], conns: {}, wealth: [], tab: 'pos', rich: 'bezit', wEdit: null };
   var BROKERS = { bitvavo: 'Bitvavo', ibkr: 'Interactive Brokers', degiro: 'DEGIRO' };
   var $ = function (id) { return document.getElementById(id); };
   var eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' });
@@ -467,17 +546,18 @@
     var map = {};
     S.tx.forEach(function (t) {
       var soort = t.soort === 'Memecoin' ? 'Crypto' : t.soort;
-      var p = map[t.ticker] || (map[t.ticker] = { ticker: t.ticker, soort: soort, gekocht: 0, betaald: 0, verkocht: 0, opbrengst: 0 });
+      var p = map[t.ticker] || (map[t.ticker] = { ticker: t.ticker, soort: soort, gekocht: 0, betaald: 0, verkocht: 0, opbrengst: 0, dividend: 0 });
       p.soort = soort;
       if (t.type === 'Koop') { p.gekocht += t.aantal; p.betaald += t.aantal * t.prijs + t.kosten; }
-      else { p.verkocht += t.aantal; p.opbrengst += t.aantal * t.prijs - t.kosten; }
+      else if (t.type === 'Verkoop') { p.verkocht += t.aantal; p.opbrengst += t.aantal * t.prijs - t.kosten; }
+      else if (t.type === 'Dividend') { p.dividend += t.prijs - t.kosten; }
     });
     var own = Object.keys(map).map(function (k) {
       var p = map[k], gem = p.gekocht ? p.betaald / p.gekocht : 0, bezit = p.gekocht - p.verkocht;
       if (Math.abs(bezit) < 1e-12) bezit = 0;
       var kv = koersVoor(k), kost = bezit * gem, waarde = bezit * kv.prijs;
       return { key: k, ticker: k, broker: null, soort: p.soort, bezit: bezit, gem: gem, koers: kv.prijs, koersSoort: kv.soort, koersAt: kv.at, orig: kv.orig,
-        kostprijs: kost, waarde: waarde, wv: waarde - kost, rendement: kost ? (waarde - kost) / kost : 0, gerealiseerd: p.opbrengst - p.verkocht * gem };
+        kostprijs: kost, waarde: waarde, wv: waarde - kost, rendement: kost ? (waarde - kost) / kost : 0, gerealiseerd: p.opbrengst - p.verkocht * gem, dividend: p.dividend };
     });
     var fromBroker = S.holdings.map(function (h) {
       var a = S.assets[h.ticker] || {}, live = a.bron && a.bron !== 'Handmatig' && S.live[h.ticker] > 0;
@@ -492,9 +572,44 @@
   }
   function ownPos(ticker) { return S.positions.filter(function (p) { return !p.broker && p.ticker === ticker; })[0]; }
 
+  // ---------- Echt rendement (geld-gewogen, XIRR) ----------
+  function xirr(flows) {
+    if (!flows.some(function (f) { return f.v < 0; }) || !flows.some(function (f) { return f.v > 0; })) return null;
+    var t0 = flows[0].d;
+    var ys = flows.map(function (f) { return (f.d - t0) / (365 * 86400000); });
+    function npv(r) { var s = 0; for (var i = 0; i < flows.length; i++) s += flows[i].v / Math.pow(1 + r, ys[i]); return s; }
+    var lo = -0.9999, hi = 10, flo = npv(lo), fhi = npv(hi);
+    if (!isFinite(flo) || !isFinite(fhi) || flo * fhi > 0) return null;
+    for (var k = 0; k < 200; k++) {
+      var mid = (lo + hi) / 2, fm = npv(mid);
+      if (Math.abs(fm) < 1e-7) return mid;
+      if (flo * fm < 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+    }
+    return (lo + hi) / 2;
+  }
+  function dayOf(iso) { var p = String(iso).split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+  function returns(pos) {
+    var flows = [], fees = 0, divTax = 0, inleg = 0;
+    S.tx.forEach(function (t) {
+      var d = dayOf(t.datum);
+      if (t.type === 'Koop') { flows.push({ d: d, v: -(t.aantal * t.prijs + t.kosten) }); fees += t.kosten; inleg += t.aantal * t.prijs + t.kosten; }
+      else if (t.type === 'Verkoop') { flows.push({ d: d, v: t.aantal * t.prijs - t.kosten }); fees += t.kosten; inleg -= t.aantal * t.prijs - t.kosten; }
+      else if (t.type === 'Dividend') { flows.push({ d: d, v: t.prijs - t.kosten }); divTax += t.kosten; }
+    });
+    flows.sort(function (a, b) { return a.d - b.d; });
+    var now = dayOf(today()), open = 0;
+    pos.forEach(function (p) { if (!p.broker && p.bezit > 0) open += p.waarde; });
+    var res = { fees: fees, divTax: divTax, inleg: inleg, rate: null, days: 0, start: null };
+    if (!flows.length) return res;
+    res.start = flows[0].d; res.days = Math.round((now - flows[0].d) / 86400000);
+    if (open > 0) flows.push({ d: now, v: open });
+    if (res.days >= 1) res.rate = xirr(flows);
+    return res;
+  }
+
   function donut(cats, tot) {
     var r = 46, c = 2 * Math.PI * r, off = 0, svg = '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="var(--sunk)" stroke-width="16"/>';
-    if (tot > 0) CATS.forEach(function (k) {
+    if (tot > 0) ALLCATS.forEach(function (k) {
       var share = (cats[k] || 0) / tot; if (share <= 0) return;
       var len = share * c, gap = share < 1 ? Math.min(2, len / 3) : 0;
       svg += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + COLORS[k] + '" stroke-width="16" stroke-dasharray="' + Math.max(len - gap, 0.01) + ' ' + (c - len + gap) +
@@ -509,22 +624,52 @@
   function render() {
     var pos = compute(); S.positions = pos;
     var open = pos.filter(function (p) { return p.bezit > 0; });
-    var tot = 0, kost = 0, ger = 0, ongereal = 0, cats = {};
-    pos.forEach(function (p) { tot += p.waarde; kost += p.kostprijs; ger += p.gerealiseerd; ongereal += p.wv; cats[p.soort] = (cats[p.soort] || 0) + p.waarde; });
-    var totWv = ongereal + ger;
-    $('totaal').textContent = money(tot);
+    var tot = 0, kost = 0, ger = 0, ongereal = 0, div = 0, noCostVal = 0, cats = {};
+    pos.forEach(function (p) { tot += p.waarde; kost += p.kostprijs; ger += p.gerealiseerd; ongereal += p.wv; div += p.dividend || 0;
+      if (p.noCost) noCostVal += p.waarde; cats[p.soort] = (cats[p.soort] || 0) + p.waarde; });
+    var totWv = ongereal + ger + div;
+    var bezit = 0, schuld = 0;
+    S.wealth.forEach(function (x) {
+      if (x.richting === 'schuld') { schuld += x.waarde; return; }
+      bezit += x.waarde; var k = x.soort === 'Bedrijf' ? 'Overig' : x.soort; cats[k] = (cats[k] || 0) + x.waarde;
+    });
+    var gross = tot + bezit;
+    $('totaal').textContent = money(tot + bezit - schuld);
     var w = $('totaalWv');
-    if (!pos.length) { w.textContent = 'Nog geen posities'; w.className = 'pill'; $('totaalSub').textContent = ''; }
+    if (!pos.length && !S.wealth.length) { w.textContent = 'Nog niets toegevoegd'; w.className = 'pill'; $('totaalSub').textContent = ''; }
+    else if (!pos.length) { w.textContent = 'Nog geen beleggingen'; w.className = 'pill'; $('totaalSub').textContent = ''; }
     else {
       w.textContent = (totWv >= 0 ? '▲ ' : '▼ ') + signed(totWv); w.className = 'pill num ' + cls(totWv);
-      $('totaalSub').textContent = kost ? pct(ongereal / kost) + ' op wat je nu hebt' : '';
+      $('totaalSub').textContent = 'winst op je beleggingen';
     }
-    $('kostprijs').textContent = money(kost);
-    var g = $('gerealiseerd'); g.textContent = signed(ger); g.className = 'v num ' + cls(ger);
+    function km(v) { return '€ ' + Math.round(v).toLocaleString('nl-NL'); }
+    $('kBeleg').textContent = km(tot);
+    $('kBezit').textContent = km(bezit);
+    $('kSchuld').textContent = schuld ? '−' + km(schuld) : km(0);
 
-    $('donut').innerHTML = donut(cats, tot);
-    $('legend').innerHTML = CATS.map(function (c) {
-      var share = tot > 0 ? (cats[c] || 0) / tot : 0;
+    var R = returns(pos);
+    var rp = $('retPct'), rl = $('retLbl');
+    if (R.rate == null) { rp.textContent = '–'; rp.className = 'ret-big num';
+      rl.textContent = R.start ? 'Nog te weinig gegevens voor een percentage' : 'Voeg aankopen toe om je rendement te zien'; }
+    else if (R.days >= 365) { rp.textContent = pct(R.rate); rp.className = 'ret-big num ' + cls(R.rate); rl.textContent = 'per jaar, sinds ' + nlDate(R.start.toISOString().slice(0, 10)); }
+    else { var per = Math.pow(1 + R.rate, R.days / 365) - 1; rp.textContent = pct(per); rp.className = 'ret-big num ' + cls(per);
+      rl.textContent = 'sinds ' + nlDate(R.start.toISOString().slice(0, 10)) + ' (' + R.days + ' dagen)'; }
+    var rt = $('retTot'); rt.textContent = signed(totWv); rt.className = 'v num ' + cls(totWv);
+    var lg = '<div><span>Koerswinst op wat je nog hebt</span><span class="' + cls(ongereal) + '">' + signed(ongereal) + '</span></div>' +
+      '<div><span>Winst op verkopen</span><span class="' + cls(ger) + '">' + signed(ger) + '</span></div>' +
+      '<div><span>Dividend na belasting</span><span class="' + cls(div) + '">' + signed(div) + '</span></div>' +
+      '<div class="sum"><span>Totale winst</span><span class="' + cls(totWv) + '">' + signed(totWv) + '</span></div>' +
+      '<div class="dim"><span>Netto ingelegd</span><span>' + money(R.inleg) + '</span></div>' +
+      '<div class="dim"><span>Betaalde transactiekosten (al verrekend)</span><span>' + money(R.fees) + '</span></div>' +
+      (R.divTax ? '<div class="dim"><span>Ingehouden dividendbelasting</span><span>' + money(R.divTax) + '</span></div>' : '') +
+      (noCostVal ? '<div class="dim"><span>Zonder aankoopprijs, telt niet mee</span><span>' + money(noCostVal) + '</span></div>' : '');
+    $('ledger').innerHTML = lg;
+
+    $('donut').innerHTML = donut(cats, gross);
+    var shown = ALLCATS.filter(function (c) { return (cats[c] || 0) > 0; });
+    if (!shown.length) shown = CATS;
+    $('legend').innerHTML = shown.map(function (c) {
+      var share = gross > 0 ? (cats[c] || 0) / gross : 0;
       return '<div><span class="dot" style="background:' + COLORS[c] + '"></span><span class="name">' + c + '</span><span class="p num">' + Math.round(share * 100) + '%</span></div>';
     }).join('');
 
@@ -558,10 +703,12 @@
     if (!S.tx.length) tl.innerHTML = '<div class="empty">Hier komen al je aan- en verkopen te staan.</div>';
     else {
       tl.innerHTML = S.tx.slice().reverse().map(function (t) {
-        var total = t.type === 'Koop' ? t.aantal * t.prijs + t.kosten : t.aantal * t.prijs - t.kosten;
+        var isDiv = t.type === 'Dividend';
+        var total = isDiv ? t.prijs - t.kosten : t.type === 'Koop' ? t.aantal * t.prijs + t.kosten : t.aantal * t.prijs - t.kosten;
         return '<div class="item"><span class="tk" style="background:' + COLORS[t.soort] + '">' + esc(t.ticker.slice(0, 4)) + '</span>' +
-          '<span class="mid"><span class="t"><span class="' + (t.type === 'Koop' ? 'buy' : 'sell') + '">' + t.type + '</span> ' + esc(t.ticker) + '</span>' +
-          '<span class="s num">' + nlDate(t.datum) + ' · ' + qty(t.aantal) + ' × ' + money(t.prijs) + (t.notitie ? ' · ' + esc(t.notitie) : '') + '</span></span>' +
+          '<span class="mid"><span class="t"><span class="' + (t.type === 'Verkoop' ? 'sell' : 'buy') + '">' + t.type + '</span> ' + esc(t.ticker) + '</span>' +
+          '<span class="s num">' + nlDate(t.datum) + ' · ' + (isDiv ? 'bruto ' + money(t.prijs) + (t.kosten ? ', belasting ' + money(t.kosten) : '') : qty(t.aantal) + ' × ' + money(t.prijs)) +
+          (t.notitie ? ' · ' + esc(t.notitie) : '') + '</span></span>' +
           '<span class="right num"><span class="v">' + money(total) + '</span></span>' +
           '<button type="button" class="del" data-id="' + esc(t.id) + '">Wissen</button></div>';
       }).join('');
@@ -577,6 +724,7 @@
         };
       });
     }
+    renderWealth(tot);
     renderConnections();
     $('tickers').innerHTML = pos.filter(function (p) { return !p.broker; }).map(function (p) { return '<option value="' + esc(p.ticker) + '">'; }).join('');
     $('status').textContent = S.liveAt ? timeStr(S.liveAt) : '';
@@ -588,6 +736,8 @@
     var r2 = await S.sb.from('assets').select('*');
     var r3 = await S.sb.from('broker_holdings').select('*');
     var r4 = await S.sb.from('broker_connections').select('*');
+    var r5 = await S.sb.from('wealth_items').select('*').order('created_at', { ascending: true });
+    S.wealth = (r5.data || []).map(function (x) { return { id: x.id, richting: x.richting, soort: x.soort, naam: x.naam, waarde: Number(x.waarde), notitie: x.notitie || '', updated_at: x.updated_at }; });
     if (r1.error || r2.error) { toast('Je gegevens konden niet worden geladen. Ververs de pagina.', true); return; }
     S.tx = r1.data.map(function (x) { return { id: x.id, type: x.type, soort: x.soort === 'Memecoin' ? 'Crypto' : x.soort, ticker: x.ticker, aantal: Number(x.aantal), prijs: Number(x.prijs),
       kosten: Number(x.kosten) || 0, datum: x.datum, notitie: x.notitie || '', extern: x.extern_id || '' }; });
@@ -622,13 +772,16 @@
 
   // ---------- Tabs & sheets ----------
   function tab(which) {
-    $('tabPos').setAttribute('aria-selected', which === 'pos'); $('tabTx').setAttribute('aria-selected', which === 'tx');
-    $('posList').hidden = which !== 'pos'; $('txList').hidden = which !== 'tx';
+    S.tab = which;
+    $('tabPos').setAttribute('aria-selected', which === 'pos'); $('tabTx').setAttribute('aria-selected', which === 'tx'); $('tabW').setAttribute('aria-selected', which === 'w');
+    $('posList').hidden = which !== 'pos'; $('txList').hidden = which !== 'tx'; $('wList').hidden = which !== 'w';
+    $('fab').textContent = which === 'w' ? '+ Bezit of schuld' : '+ Transactie';
   }
   $('tabPos').onclick = function () { tab('pos'); };
+  $('tabW').onclick = function () { tab('w'); };
   $('tabTx').onclick = function () { tab('tx'); };
   function openSheet(id) { $('scrim').classList.add('open'); $(id).classList.add('open'); }
-  function closeSheets() { $('scrim').classList.remove('open'); ['addSheet', 'priceSheet', 'brokerSheet'].forEach(function (id) { $(id).classList.remove('open'); }); if (typeof clearChart === 'function') setTimeout(clearChart, 260); }
+  function closeSheets() { $('scrim').classList.remove('open'); ['addSheet', 'priceSheet', 'brokerSheet', 'wSheet'].forEach(function (id) { $(id).classList.remove('open'); }); if (typeof clearChart === 'function') setTimeout(clearChart, 260); }
   $('scrim').onclick = closeSheets;
   Array.prototype.forEach.call(document.querySelectorAll('[data-close]'), function (b) { b.onclick = closeSheets; });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheets(); });
@@ -638,9 +791,14 @@
     Array.prototype.forEach.call($(id).querySelectorAll('button'), function (b) { b.onclick = function () { setSeg(id, key, b.getAttribute('data-v')); updTotal(); }; });
   });
   function updTotal() {
-    var a = parseNum($('fAantal').value), p = parseNum($('fPrijs').value), k = parseNum($('fKosten').value) || 0;
-    var tot = (isFinite(a) && isFinite(p)) ? (S.type === 'Verkoop' ? a * p - k : a * p + k) : 0;
-    $('totLabel').textContent = S.type === 'Verkoop' ? 'Totaal ontvangen' : 'Totaal betaald';
+    var isDiv = S.type === 'Dividend';
+    $('fAantalWrap').hidden = isDiv; $('fRow1').style.gridTemplateColumns = isDiv ? '1fr' : '';
+    $('lPrijs').textContent = isDiv ? 'Bruto dividend in €' : 'Prijs per stuk in €';
+    $('lKosten').textContent = isDiv ? 'Ingehouden belasting in €' : 'Kosten in €';
+    $('fHint').textContent = isDiv ? 'Het totale bedrag vóór belasting, in euro. De ingehouden dividendbelasting vul je apart in.' : 'Vul de prijs in euro in, zoals je broker of exchange hem afrekende.';
+    var a = isDiv ? 1 : parseNum($('fAantal').value), p = parseNum($('fPrijs').value), k = parseNum($('fKosten').value) || 0;
+    var tot = (isFinite(a) && isFinite(p)) ? (S.type === 'Koop' ? a * p + k : a * p - k) : 0;
+    $('totLabel').textContent = isDiv ? 'Netto ontvangen' : S.type === 'Verkoop' ? 'Totaal ontvangen' : 'Totaal betaald';
     $('fTotaal').textContent = money(tot);
   }
   ['fAantal', 'fPrijs', 'fKosten'].forEach(function (id) { $(id).addEventListener('input', updTotal); });
@@ -650,6 +808,7 @@
     if (hit) setSeg('segSoort', 'soort', hit.soort);
   });
   $('fab').onclick = function () {
+    if (S.tab === 'w') return openWealth(null);
     ['fTicker', 'fAantal', 'fPrijs', 'fKosten', 'fNotitie'].forEach(function (id) { $(id).value = ''; });
     $('fDatum').value = today(); setSeg('segType', 'type', 'Koop'); updTotal(); openSheet('addSheet');
     setTimeout(function () { $('fTicker').focus(); }, 260);
@@ -660,6 +819,11 @@
     var t = { type: S.type, soort: S.soort, ticker: ticker, aantal: parseNum($('fAantal').value), prijs: parseNum($('fPrijs').value),
       kosten: parseNum($('fKosten').value) || 0, datum: $('fDatum').value || today(), notitie: $('fNotitie').value.trim().slice(0, 200) || null };
     if (!ticker) return toast('Vul een ticker in, bijvoorbeeld BTC.', true);
+    if (t.type === 'Dividend') {
+      t.aantal = 1;
+      if (!(t.prijs > 0)) return toast('Vul het bruto dividendbedrag in.', true);
+      if (t.kosten > t.prijs) return toast('De belasting kan niet hoger zijn dan het dividend.', true);
+    }
     if (!(t.aantal > 0)) return toast('Vul een aantal groter dan 0 in.', true);
     if (!(t.prijs >= 0)) return toast('Vul een geldige prijs per stuk in.', true);
     if (t.type === 'Verkoop') {
@@ -668,7 +832,7 @@
     }
     var btn = this; btn.disabled = true; btn.textContent = 'Opslaan…';
     var r = await S.sb.from('transactions').insert(t);
-    var isNew = !S.assets[ticker];
+    var isNew = !S.assets[ticker] && t.type !== 'Dividend';
     if (!r.error && isNew) {
       var g = guessSource(ticker, t.soort);
       await S.sb.from('assets').upsert({ ticker: ticker, bron: g.bron, code: g.code || null, handmatig: t.prijs, handmatig_at: new Date().toISOString() });
@@ -765,6 +929,80 @@
     wrap.appendChild(box);
   }
   function clearChart() { $('tvWrap').innerHTML = '<div class="chart-msg">Grafiek laden…</div>'; }
+
+  // ---------- Vermogen (bezittingen en schulden) ----------
+  function renderWealth(beleg) {
+    var el = $('wList'), bez = S.wealth.filter(function (x) { return x.richting === 'bezit'; }), sch = S.wealth.filter(function (x) { return x.richting === 'schuld'; });
+    function row(x) {
+      var d = daysAgo(x.updated_at), stale = d >= 90 ? '<span class="chip stale">' + Math.floor(d / 30) + ' mnd oud</span>' : '';
+      return '<button type="button" class="item" data-w="' + esc(x.id) + '"><span class="tk" style="background:' + COLORS[x.richting === 'schuld' ? 'Hypotheek' : x.soort] + '">' + WTILE[x.soort] + '</span>' +
+        '<span class="mid"><span class="t">' + esc(x.naam) + '<span class="chip">' + esc(x.soort) + '</span>' + stale + '</span>' +
+        '<span class="s">Bijgewerkt ' + nlDate(String(x.updated_at).slice(0, 10)) + (x.notitie ? ' · ' + esc(x.notitie) : '') + '</span></span>' +
+        '<span class="right num"><span class="v' + (x.richting === 'schuld' ? ' neg' : '') + '">' + (x.richting === 'schuld' ? '−' : '') + money(x.waarde) + '</span></span></button>';
+    }
+    var sb = bez.reduce(function (a, x) { return a + x.waarde; }, 0), ss = sch.reduce(function (a, x) { return a + x.waarde; }, 0);
+    var h = '<div class="wsec">Bezittingen</div>' +
+      '<button type="button" class="item" data-goto="pos"><span class="tk" style="background:var(--accent)">BELEG</span><span class="mid"><span class="t">Beleggingen</span>' +
+      '<span class="s">Automatisch, uit je posities</span></span><span class="right num"><span class="v">' + money(beleg) + '</span></span></button>' +
+      bez.map(row).join('');
+    if (sch.length) h += '<div class="wsec">Schulden</div>' + sch.map(row).join('');
+    h += '<div class="wsum num"><span>Nettovermogen</span><span>' + money(beleg + sb - ss) + '</span></div>';
+    if (!S.wealth.length) h += '<div class="empty" style="padding-top:8px">Voeg je spaargeld, huis, pensioen of hypotheek toe voor je volledige nettovermogen.<br>Tik op <strong>+ Bezit of schuld</strong>.</div>';
+    el.innerHTML = h;
+    Array.prototype.forEach.call(el.querySelectorAll('[data-w]'), function (b) { b.onclick = function () { openWealth(b.getAttribute('data-w')); }; });
+    var g = el.querySelector('[data-goto]'); if (g) g.onclick = function () { tab('pos'); };
+  }
+  function fillSoort(sel) {
+    $('wSoort').innerHTML = WSOORT[S.rich].map(function (k) { return '<option' + (k === sel ? ' selected' : '') + '>' + k + '</option>'; }).join('');
+    syncWHint();
+  }
+  function syncWHint() {
+    var k = $('wSoort').value;
+    $('wHint').textContent = WHINT[k] || '';
+    $('wWaardeLbl').textContent = S.rich === 'schuld' ? 'Openstaand bedrag in €' : 'Waarde in €';
+    $('wNaam').placeholder = { Spaargeld: 'bijv. Spaarrekening ING', Vastgoed: 'bijv. Huis Utrecht', Pensioen: 'bijv. ABP-pensioen', Bedrijf: 'bijv. Mijn bv', Overig: 'bijv. Auto',
+      Hypotheek: 'bijv. Hypotheek huis', Studieschuld: 'Studieschuld DUO', Lening: 'bijv. Persoonlijke lening' }[k] || '';
+  }
+  function setRich(v, sel) {
+    S.rich = v;
+    Array.prototype.forEach.call($('segRich').querySelectorAll('button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
+    fillSoort(sel);
+  }
+  Array.prototype.forEach.call($('segRich').querySelectorAll('button'), function (b) { b.onclick = function () { setRich(b.getAttribute('data-v')); }; });
+  $('wSoort').onchange = syncWHint;
+  function openWealth(id) {
+    var x = id ? S.wealth.filter(function (w) { return w.id === id; })[0] : null;
+    S.wEdit = x ? x.id : null;
+    setRich(x ? x.richting : 'bezit', x ? x.soort : null);
+    $('wTitle').textContent = x ? 'Bijwerken' : 'Bezitting of schuld toevoegen';
+    $('wNaam').value = x ? x.naam : '';
+    $('wWaarde').value = x ? String(x.waarde).replace('.', ',') : '';
+    $('wNotitie').value = x ? x.notitie : '';
+    var d = $('wDel'); d.hidden = !x; d.classList.remove('armed'); d.textContent = 'Verwijderen'; d.disabled = false;
+    openSheet('wSheet');
+    setTimeout(function () { (x ? $('wWaarde') : $('wNaam')).focus(); }, 260);
+  }
+  $('wSave').onclick = async function () {
+    var soort = $('wSoort').value, naam = $('wNaam').value.trim().slice(0, 60) || soort, waarde = parseNum($('wWaarde').value);
+    if (!(waarde >= 0)) return toast('Vul een geldig bedrag in.', true);
+    var row = { richting: S.rich, soort: soort, naam: naam, waarde: Math.round(waarde * 100) / 100, notitie: $('wNotitie').value.trim().slice(0, 200) || null, updated_at: new Date().toISOString() };
+    var btn = this; btn.disabled = true;
+    var r = S.wEdit ? await S.sb.from('wealth_items').update(row).eq('id', S.wEdit) : await S.sb.from('wealth_items').insert(row);
+    btn.disabled = false;
+    if (r.error) return toast('Opslaan is niet gelukt. Probeer het opnieuw.', true);
+    closeSheets(); toast(naam + ' opgeslagen'); await loadData(); tab('w');
+  };
+  $('wDel').onclick = function () {
+    var d = this;
+    if (!d.classList.contains('armed')) { d.classList.add('armed'); d.textContent = 'Zeker? Tik nog eens';
+      setTimeout(function () { d.classList.remove('armed'); d.textContent = 'Verwijderen'; }, 3000); return; }
+    d.disabled = true;
+    S.sb.from('wealth_items').delete().eq('id', S.wEdit).then(async function (r) {
+      d.disabled = false;
+      if (r.error) return toast('Verwijderen is niet gelukt.', true);
+      closeSheets(); toast('Verwijderd'); await loadData();
+    });
+  };
 
   // ---------- Brokers ----------
   async function callBrokers(body) {
