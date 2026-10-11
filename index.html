@@ -458,8 +458,9 @@
         <li>DEGIRO heeft geen koppeling voor apps, dus het gaat met een bestand. Log in op <b>degiro.nl</b> (de website, niet de app).</li>
         <li>Ga naar <b>Inbox → Transacties</b>, kies als periode vanaf je eerste aankoop en klik op <b>Exporteren → CSV</b>.</li>
         <li>Kies dat bestand hieronder. Je kunt later een nieuwe export kiezen; dubbele transacties worden overgeslagen.</li>
+        <li><b>Dividend:</b> ga naar <b>Inbox → Rekeningoverzicht</b>, kies dezelfde periode, exporteer als <b>CSV</b> en kies dat bestand hier ook. Dividend in dollars wordt omgerekend met de ECB-koers van die dag.</li>
       </ol>
-      <label for="dgFile">Transacties.csv</label>
+      <label for="dgFile">Transacties.csv of Rekeningoverzicht.csv</label>
       <input id="dgFile" type="file" accept=".csv,text/csv">
       <div class="hint" id="dgMsg"></div>
     </div>
@@ -1014,7 +1015,8 @@
     }
     return r.data || { error: 'leeg antwoord' };
   }
-  function degiroCount() { return S.tx.filter(function (t) { return t.extern.indexOf('degiro:') === 0; }).length; }
+  function degiroCount() { return S.tx.filter(function (t) { return t.extern.indexOf('degiro') === 0; }).length; }
+  function degiroDivCount() { return S.tx.filter(function (t) { return t.extern.indexOf('degiro-div:') === 0; }).length; }
   function holdCount(b) { return S.holdings.filter(function (h) { return h.broker === b; }).length; }
   function agoStr(iso) {
     if (!iso) return '';
@@ -1038,7 +1040,7 @@
       open.hidden = b !== 'degiro'; if (b !== 'degiro') form.hidden = true;
       open.textContent = 'Nieuwe export';
       if (b === 'degiro') {
-        st.className = 'ok'; st.textContent = 'Geïmporteerd · ' + degiroCount() + ' transacties';
+        st.className = 'ok'; var nd = degiroDivCount(); st.textContent = 'Geïmporteerd · ' + (degiroCount() - nd) + ' transacties' + (nd ? ', ' + nd + ' dividenden' : '');
         lk.hidden = false;
         lk.innerHTML = '<div class="broker-acts"><button type="button" class="small-btn" data-wipe>Import wissen</button></div>';
       } else {
@@ -1093,7 +1095,7 @@
     if (w) w.onclick = function () {
       arm(w, 'Alle DEGIRO-transacties wissen?', async function () {
         w.disabled = true;
-        var r = await S.sb.from('transactions').delete().like('extern_id', 'degiro:%');
+        var r = await S.sb.from('transactions').delete().like('extern_id', 'degiro%');
         if (r.error) { w.disabled = false; return toast('Wissen mislukt. Probeer het opnieuw.', true); }
         toast('DEGIRO-import gewist'); loadData();
       });
@@ -1150,12 +1152,98 @@
     return Number(s);
   }
   function findCol(h, re, not) { for (var i = 0; i < h.length; i++) { var v = h[i].trim(); if (re.test(v) && !(not && not.test(v))) return i; } return -1; }
+  function dateIso(v) {
+    var dp = String(v || '').trim().split(/[-\/.]/);
+    if (dp.length !== 3) return '';
+    var d = dp[2].length === 4 ? dp[2] + '-' + dp[1].padStart(2, '0') + '-' + dp[0].padStart(2, '0') : dp.join('-');
+    return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '';
+  }
+  async function isinLookupAll(isins) {
+    var keys = Object.keys(isins), found = {};
+    for (var i = 0; i < keys.length; i += 80) {
+      var r = await callBrokers({ action: 'isin', items: keys.slice(i, i + 80).map(function (k) { return { isin: k, beurs: isins[k] }; }) });
+      if (r.error) throw new Error('Opzoeken mislukt: ' + r.error);
+      Object.keys(r.results || {}).forEach(function (k) { if (r.results[k]) found[k] = r.results[k]; });
+    }
+    return found;
+  }
+  function tickerFor(f, product, isin) {
+    return f ? f.symbol.split('.')[0].replace(/[^A-Z0-9\-]/g, '').slice(0, 20) : (String(product).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) || isin);
+  }
+  async function fxSeries(cur, from, to) {
+    var r = await fetch('https://api.frankfurter.dev/v1/' + from + '..' + to + '?base=' + encodeURIComponent(cur) + '&symbols=EUR');
+    if (!r.ok) throw new Error('Wisselkoers ' + cur + ' is niet beschikbaar.');
+    var j = await r.json(), m = {};
+    Object.keys(j.rates || {}).forEach(function (d) { m[d] = j.rates[d].EUR; });
+    if (!Object.keys(m).length) throw new Error('Wisselkoers ' + cur + ' is niet beschikbaar.');
+    return m;
+  }
+  function rateOn(series, d) {
+    var ds = Object.keys(series).sort(), best = ds[0];
+    for (var i = 0; i < ds.length; i++) { if (ds[i] <= d) best = ds[i]; else break; }
+    return series[best];
+  }
+  async function importAccount(rows, h, msg) {
+    var c = { datum: findCol(h, /^(datum|date)$/i), vdatum: findCol(h, /^(valutadatum|value date)$/i), product: findCol(h, /^product$/i), isin: findCol(h, /^isin$/i),
+      oms: findCol(h, /^(omschrijving|description)$/i), mut: findCol(h, /^(mutatie|change)$/i) };
+    if (c.datum < 0 || c.isin < 0) throw new Error('Dit rekeningoverzicht kan ik niet lezen. Exporteer het opnieuw als CSV.');
+    var groups = {};
+    rows.slice(1).forEach(function (r) {
+      var oms = String(r[c.oms] || '').trim().toLowerCase(), isin = String(r[c.isin] || '').trim().toUpperCase();
+      var isTax = /dividendbelasting|dividend tax/.test(oms), isDiv = !isTax && /^dividend/.test(oms);
+      if ((!isDiv && !isTax) || !/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(isin)) return;
+      var cur = String(r[c.mut] || '').trim().toUpperCase(), amt = num2(r[c.mut + 1]);
+      if (!isFinite(amt) || !/^[A-Z]{3}$/.test(cur)) return;
+      var d = dateIso(c.vdatum > -1 && r[c.vdatum] ? r[c.vdatum] : r[c.datum]);
+      if (!d) return;
+      var k = isin + '|' + d + '|' + cur;
+      var g = groups[k] || (groups[k] = { isin: isin, d: d, cur: cur, gross: 0, tax: 0, product: c.product > -1 ? String(r[c.product] || '').trim() : '' });
+      if (isTax) g.tax -= amt; else g.gross += amt;
+    });
+    var list = Object.keys(groups).map(function (k) { return groups[k]; }).filter(function (g) { return g.gross > 0.000001; });
+    if (!list.length) throw new Error('Geen dividend gevonden in dit rekeningoverzicht. Kies een langere periode bij het exporteren.');
+    msg.textContent = list.length + ' dividenden gevonden, omrekenen en opzoeken…';
+    var span = {};
+    list.forEach(function (g) { if (g.cur === 'EUR') return; var x = span[g.cur] || (span[g.cur] = { min: g.d, max: g.d }); if (g.d < x.min) x.min = g.d; if (g.d > x.max) x.max = g.d; });
+    var fx = {};
+    for (var cur in span) {
+      var from = new Date(dayOf(span[cur].min) - 10 * 86400000).toISOString().slice(0, 10);
+      fx[cur] = await fxSeries(cur, from, span[cur].max);
+    }
+    var isins = {}; list.forEach(function (g) { isins[g.isin] = ''; });
+    var found = await isinLookupAll(isins);
+    var have = {}; S.tx.forEach(function (t) { if (t.extern) have[t.extern] = 1; });
+    var out = [];
+    list.forEach(function (g) {
+      var ext = 'degiro-div:' + g.isin + ':' + g.d + ':' + g.cur;
+      if (have[ext]) return;
+      var rate = g.cur === 'EUR' ? 1 : rateOn(fx[g.cur], g.d);
+      var gross = Math.round(g.gross * rate * 100) / 100, tax = Math.min(gross, Math.max(0, Math.round(g.tax * rate * 100) / 100));
+      if (!(gross > 0)) return;
+      var f = found[g.isin];
+      out.push({ user_id: S.user.id, extern_id: ext, type: 'Dividend', soort: f ? f.soort : 'Aandeel', ticker: tickerFor(f, g.product, g.isin), aantal: 1,
+        prijs: gross, kosten: tax, datum: g.d, notitie: ('DEGIRO dividend · ' + g.product + (g.cur !== 'EUR' ? ' · ' + g.cur : '')).slice(0, 200) });
+    });
+    msg.textContent = 'Opslaan…';
+    for (var j = 0; j < out.length; j += 200) {
+      var w = await S.sb.from('transactions').upsert(out.slice(j, j + 200), { onConflict: 'user_id,extern_id', ignoreDuplicates: true });
+      if (w.error) throw new Error('Opslaan mislukt: ' + w.error.message);
+    }
+    var net = out.reduce(function (a, t) { return a + t.prijs - t.kosten; }, 0);
+    msg.textContent = out.length ? out.length + ' dividenden geïmporteerd, samen ' + money(net) + ' na belasting.' + (list.length > out.length ? ' ' + (list.length - out.length) + ' stonden er al.' : '')
+      : 'Alle dividenden uit dit bestand stonden er al in.';
+    toast(out.length ? 'DEGIRO: ' + out.length + ' dividenden toegevoegd' : 'Niks nieuws in dit bestand');
+    await loadData();
+  }
   $('dgFile').onchange = async function () {
     var file = this.files && this.files[0], input = this; if (!file) return;
     var msg = $('dgMsg'); msg.textContent = 'Bestand lezen…';
     try {
       var rows = parseCSV(await file.text());
       var h = rows[0] || [];
+      if (findCol(h, /^(omschrijving|description)$/i) > -1 && findCol(h, /^(mutatie|change)$/i) > -1) {
+        await importAccount(rows, h, msg); input.value = ''; return;
+      }
       var c = { datum: findCol(h, /^(datum|date)$/i), tijd: findCol(h, /^(tijd|time)$/i), product: findCol(h, /^product$/i), isin: findCol(h, /^isin$/i),
         beurs: findCol(h, /^(beurs|reference exchange|reference)$/i), aantal: findCol(h, /^(aantal|quantity|number)$/i), koers: findCol(h, /^(koers|price)$/i),
         waarde: findCol(h, /^(waarde|value)$/i), kosten: findCol(h, /transactiekosten|transaction/i), order: findCol(h, /order/i) };
